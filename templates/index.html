@@ -103,6 +103,163 @@
             min-width: 100px;
             text-align: center;
             font-size: 0.9rem;
+        }
+
+        .slideshow-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #404040;
+        }
+
+        .slideshow-btn {
+            background: #ff0000;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .slideshow-btn:hover {
+            background: #ff3333;
+            transform: scale(1.05);
+        }
+
+        .slideshow-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .slideshow-settings {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            flex-wrap: wrap;
+        }
+
+        .slideshow-timing {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .slideshow-label {
+            font-weight: 500;
+            color: #f1f1f1;
+            font-size: 0.9rem;
+        }
+
+        .slideshow-slider {
+            width: 120px;
+            height: 4px;
+            border-radius: 2px;
+            background: #4d4d4d;
+            outline: none;
+            appearance: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .slideshow-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #ff6b00;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .slideshow-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            background: #ff8533;
+        }
+
+        .slideshow-slider::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #ff6b00;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .slideshow-display {
+            background: #ff6b00;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-weight: 500;
+            min-width: 40px;
+            text-align: center;
+            font-size: 0.8rem;
+        }
+
+        .slideshow-random {
+            display: flex;
+            align-items: center;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: #f1f1f1;
+            user-select: none;
+        }
+
+        .checkbox-container input {
+            display: none;
+        }
+
+        .checkmark {
+            height: 18px;
+            width: 18px;
+            background-color: #4d4d4d;
+            border: 2px solid #666;
+            border-radius: 3px;
+            margin-right: 8px;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .checkbox-container:hover .checkmark {
+            background-color: #555;
+            border-color: #777;
+        }
+
+        .checkbox-container input:checked ~ .checkmark {
+            background-color: #ff6b00;
+            border-color: #ff6b00;
+        }
+
+        .checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+            left: 5px;
+            top: 2px;
+            width: 4px;
+            height: 8px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        .checkbox-container input:checked ~ .checkmark:after {
+            display: block;
         }        .size-labels {
             display: flex;
             justify-content: space-between;
@@ -271,18 +428,66 @@
             max-height: 95vh;
             border-radius: 8px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+            transition: opacity 0.3s ease;
+        }
+
+        .slideshow-controls {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            gap: 15px;
+            z-index: 1001;
+        }
+
+        .slideshow-nav-btn {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .slideshow-nav-btn:hover {
+            background: rgba(0, 0, 0, 0.9);
+            transform: scale(1.1);
+        }
+
+        .slideshow-info {
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: none;
+            z-index: 1001;
+            backdrop-filter: blur(10px);
         }        @media (max-width: 768px) {
             .container {
                 padding: 20px;
                 margin: 10px;
             }
             
-            .slider-container {
+            .slider-container, .slideshow-container {
                 flex-direction: column;
                 gap: 15px;
             }
             
-            .size-slider {
+            .slideshow-settings {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .size-slider, .slideshow-slider {
                 width: 250px;
             }
             
@@ -297,6 +502,16 @@
 
             h1 {
                 font-size: 2rem;
+            }
+
+            .slideshow-controls {
+                bottom: 20px;
+                gap: 10px;
+            }
+
+            .slideshow-nav-btn {
+                padding: 10px 12px;
+                font-size: 1rem;
             }
         }
     </style>
@@ -325,6 +540,25 @@
                 </div>
                 <div class="size-display" id="sizeDisplay">Medium</div>
             </div>
+            
+            <!-- Slideshow Controls -->
+            <div class="slideshow-container">
+                <button id="slideshowBtn" class="slideshow-btn">▶️ Start Slideshow</button>
+                <div class="slideshow-settings">
+                    <div class="slideshow-timing">
+                        <span class="slideshow-label">Interval:</span>
+                        <input type="range" id="slideshowSlider" class="slideshow-slider" min="2" max="20" value="5" step="3">
+                        <div class="slideshow-display" id="slideshowDisplay">5s</div>
+                    </div>
+                    <div class="slideshow-random">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="randomOrder">
+                            <span class="checkmark"></span>
+                            Random Order
+                        </label>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div id="gallery" class="gallery">
@@ -337,6 +571,15 @@
 
     <div class="fullscreen-overlay" id="fullscreenOverlay">
         <img class="fullscreen-image" id="fullscreenImage" src="" alt="">
+        <div class="slideshow-controls" id="slideshowControls">
+            <button class="slideshow-nav-btn" id="prevBtn">⏮️</button>
+            <button class="slideshow-nav-btn" id="playPauseBtn">⏸️</button>
+            <button class="slideshow-nav-btn" id="nextBtn">⏭️</button>
+            <button class="slideshow-nav-btn" id="exitBtn">❌</button>
+        </div>
+        <div class="slideshow-info" id="slideshowInfo">
+            <span id="imageCounter">1 / 1</span> - <span id="imageName">Image Name</span>
+        </div>
     </div>    <script>
         const sizeSlider = document.getElementById('sizeSlider');
         const sizeDisplay = document.getElementById('sizeDisplay');
@@ -345,6 +588,20 @@
         const breadcrumbPath = document.getElementById('breadcrumbPath');
         const fullscreenOverlay = document.getElementById('fullscreenOverlay');
         const fullscreenImage = document.getElementById('fullscreenImage');
+        
+        // Slideshow elements
+        const slideshowBtn = document.getElementById('slideshowBtn');
+        const slideshowSlider = document.getElementById('slideshowSlider');
+        const slideshowDisplay = document.getElementById('slideshowDisplay');
+        const randomOrder = document.getElementById('randomOrder');
+        const slideshowControls = document.getElementById('slideshowControls');
+        const slideshowInfo = document.getElementById('slideshowInfo');
+        const prevBtn = document.getElementById('prevBtn');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const exitBtn = document.getElementById('exitBtn');
+        const imageCounter = document.getElementById('imageCounter');
+        const imageName = document.getElementById('imageName');
 
         // Size mapping: slider value to actual pixel size and display name
         const sizeMap = {
@@ -357,6 +614,12 @@
 
         let currentSize = 3;
         let currentFolder = '';
+        let allImages = []; // Store all image data for slideshow
+        let slideshowActive = false;
+        let slideshowTimer = null;
+        let slideshowInterval = 5; // seconds
+        let currentImageIndex = 0;
+        let slideshowImages = []; // Ordered/shuffled images for slideshow
 
         // Get current folder from URL
         function getCurrentFolder() {
@@ -394,9 +657,113 @@
             breadcrumbPath.innerHTML = breadcrumbHTML;
         }
 
+        function updateSlideshowDisplay() {
+            slideshowDisplay.textContent = `${slideshowInterval}s`;
+        }
+
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function prepareSlideshowImages() {
+            if (randomOrder.checked) {
+                slideshowImages = shuffleArray(allImages);
+            } else {
+                slideshowImages = [...allImages];
+            }
+        }
+
+        function updateSlideshowInfo() {
+            if (slideshowImages.length > 0) {
+                imageCounter.textContent = `${currentImageIndex + 1} / ${slideshowImages.length}`;
+                imageName.textContent = slideshowImages[currentImageIndex].filename;
+            }
+        }
+
+        function showSlideshowImage(index) {
+            if (index >= 0 && index < slideshowImages.length) {
+                currentImageIndex = index;
+                const image = slideshowImages[currentImageIndex];
+                fullscreenImage.src = `/images/${image.path}`;
+                fullscreenImage.alt = image.filename;
+                updateSlideshowInfo();
+            }
+        }
+
+        function nextSlideshowImage() {
+            const nextIndex = (currentImageIndex + 1) % slideshowImages.length;
+            showSlideshowImage(nextIndex);
+        }
+
+        function prevSlideshowImage() {
+            const prevIndex = (currentImageIndex - 1 + slideshowImages.length) % slideshowImages.length;
+            showSlideshowImage(prevIndex);
+        }
+
+        function startSlideshowTimer() {
+            if (slideshowTimer) {
+                clearInterval(slideshowTimer);
+            }
+            slideshowTimer = setInterval(nextSlideshowImage, slideshowInterval * 1000);
+        }
+
+        function stopSlideshowTimer() {
+            if (slideshowTimer) {
+                clearInterval(slideshowTimer);
+                slideshowTimer = null;
+            }
+        }
+
+        function startSlideshow() {
+            if (allImages.length === 0) {
+                alert('No images found in current folder!');
+                return;
+            }
+
+            slideshowActive = true;
+            prepareSlideshowImages();
+            currentImageIndex = 0;
+            
+            showSlideshowImage(0);
+            fullscreenOverlay.style.display = 'block';
+            slideshowControls.style.display = 'flex';
+            slideshowInfo.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            
+            startSlideshowTimer();
+            slideshowBtn.textContent = '⏹️ Stop Slideshow';
+            slideshowBtn.disabled = false;
+            playPauseBtn.textContent = '⏸️';
+        }
+
+        function stopSlideshow() {
+            slideshowActive = false;
+            stopSlideshowTimer();
+            hideFullscreen();
+            slideshowBtn.textContent = '▶️ Start Slideshow';
+            slideshowBtn.disabled = false;
+        }
+
         function updateSizeDisplay() {
             const size = sizeMap[currentSize];
             sizeDisplay.textContent = size.name;
+        }
+
+        function updateSlideshowButton() {
+            if (allImages.length === 0) {
+                slideshowBtn.disabled = true;
+                slideshowBtn.textContent = '▶️ No Images';
+            } else {
+                slideshowBtn.disabled = false;
+                if (!slideshowActive) {
+                    slideshowBtn.textContent = `▶️ Start Slideshow (${allImages.length})`;
+                }
+            }
         }
 
         function showLoading() {
@@ -434,31 +801,40 @@
 
                 if (thumbnails.length === 0) {
                     showNoImages();
+                    allImages = [];
+                    updateSlideshowButton();
                     return;
                 }
 
-                gallery.innerHTML = '';                thumbnails.forEach(item => {
-                    console.log('Processing item:', item); // Debug log
-                    
+                gallery.innerHTML = '';
+                allImages = []; // Reset images array
+                
+                thumbnails.forEach(item => {
                     if (item.type === 'folder') {
                         // Create folder item with dynamic sizing
                         const folderItem = document.createElement('div');
                         folderItem.className = 'folder-item';
-                        folderItem.onclick = () => navigateToFolder(item.path);                        // Calculate icon size based on thumbnail size
+                        folderItem.onclick = () => navigateToFolder(item.path);
+
+                        // Calculate icon size based on thumbnail size
                         const iconSize = Math.max(40, size * 0.4); // Minimum 40px, scales with size
                         const fontSize = 0.9; // Fixed readable font size
                         const folderHeight = Math.max(120, size + 60); // Dynamic height based on thumbnail size
                         
-                        console.log(`Creating folder: ${item.name}, iconSize: ${iconSize}, fontSize: ${fontSize}, height: ${folderHeight}`); // Debug
-                        
                         folderItem.style.minHeight = `${folderHeight}px`;
                         folderItem.innerHTML = `
                             <div class="folder-icon" style="font-size: ${iconSize}px;">📁</div>
-                            <div class="folder-name" style="font-size: ${fontSize}rem; color: #f1f1f1 !important; background: rgba(255,0,0,0.1);">${item.name}</div>
+                            <div class="folder-name" style="font-size: ${fontSize}rem;">${item.name}</div>
                         `;
                         
                         gallery.appendChild(folderItem);
                     } else {
+                        // Store image data for slideshow
+                        allImages.push({
+                            filename: item.filename,
+                            path: item.path
+                        });
+
                         // Create image item
                         const imageItem = document.createElement('div');
                         imageItem.className = 'image-item';
@@ -472,6 +848,9 @@
                     }
                 });
 
+                // Update slideshow button
+                updateSlideshowButton();
+
                 // Update grid columns based on thumbnail size
                 const minWidth = Math.max(150, size + 50);
                 gallery.style.gridTemplateColumns = `repeat(auto-fill, minmax(${minWidth}px, 1fr))`;
@@ -483,6 +862,8 @@
                         ❌ Error loading images. Please check if the server is running.
                     </div>
                 `;
+                allImages = [];
+                updateSlideshowButton();
             }
         }
 
@@ -504,12 +885,95 @@
             loadThumbnails();
         });
 
-        fullscreenOverlay.addEventListener('click', hideFullscreen);
+        // Slideshow controls event listeners
+        slideshowBtn.addEventListener('click', function() {
+            if (slideshowActive) {
+                stopSlideshow();
+            } else {
+                startSlideshow();
+            }
+        });
+
+        slideshowSlider.addEventListener('input', function() {
+            slideshowInterval = parseInt(this.value);
+            updateSlideshowDisplay();
+            if (slideshowActive && slideshowTimer) {
+                startSlideshowTimer(); // Restart timer with new interval
+            }
+        });
+
+        prevBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            prevSlideshowImage();
+        });
+
+        nextBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            nextSlideshowImage();
+        });
+
+        playPauseBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (slideshowTimer) {
+                stopSlideshowTimer();
+                playPauseBtn.textContent = '▶️';
+            } else {
+                startSlideshowTimer();
+                playPauseBtn.textContent = '⏸️';
+            }
+        });
+
+        exitBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            stopSlideshow();
+        });
+
+        // Prevent fullscreen overlay from closing when clicking on slideshow controls
+        fullscreenImage.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+
+        slideshowControls.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+
+        slideshowInfo.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+
+        fullscreenOverlay.addEventListener('click', function() {
+            if (slideshowActive) {
+                // Only close if not in slideshow mode, or stop slideshow instead
+                stopSlideshow();
+            } else {
+                hideFullscreen();
+            }
+        });
 
         // Keyboard navigation
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
-                hideFullscreen();
+                if (slideshowActive) {
+                    stopSlideshow();
+                } else {
+                    hideFullscreen();
+                }
+            } else if (slideshowActive) {
+                // Slideshow keyboard controls
+                switch(e.key) {
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        prevSlideshowImage();
+                        break;
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        nextSlideshowImage();
+                        break;
+                    case ' ':
+                        e.preventDefault();
+                        playPauseBtn.click();
+                        break;
+                }
             }
         });
 
@@ -517,6 +981,7 @@
         currentFolder = getCurrentFolder();
         updateBreadcrumb();
         updateSizeDisplay();
+        updateSlideshowDisplay();
         loadThumbnails();
 
         // Auto-refresh every 30 seconds to pick up new images
