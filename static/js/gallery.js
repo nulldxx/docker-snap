@@ -188,7 +188,7 @@ function prepareSlideshowImages() {
 function updateSlideshowInfo() {
     imageCounter.textContent = `${currentImageIndex + 1} / ${slideshowImages.length}`;
     if (slideshowImages[currentImageIndex]) {
-        imageName.textContent = slideshowImages[currentImageIndex].name;
+        imageName.textContent = slideshowImages[currentImageIndex].filename;
     }
 }
 
@@ -197,7 +197,7 @@ function showSlideshowImage(index) {
         currentImageIndex = index;
         const imageData = slideshowImages[currentImageIndex];
         fullscreenImage.src = `/image/${encodeURIComponent(imageData.path)}`;
-        fullscreenImage.alt = imageData.name;
+        fullscreenImage.alt = imageData.filename;
         updateSlideshowInfo();
     }
 }
@@ -330,17 +330,25 @@ async function loadThumbnails() {
     showLoading();
     
     try {
-        const folderParam = currentFolder ? `?folder=${encodeURIComponent(currentFolder)}` : '';
-        const sizeParam = currentFolder ? `&size=${sizeMap[currentSize].pixels}` : `?size=${sizeMap[currentSize].pixels}`;
-        const response = await fetch(`/api/thumbnails${folderParam}${sizeParam}`);
+        const size = sizeMap[currentSize].pixels;
+        let apiUrl = `/api/thumbnails/${size}`;
+        
+        if (currentFolder) {
+            apiUrl += `/${currentFolder}`;
+        }
+        
+        const response = await fetch(apiUrl);
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
+          const data = await response.json();
         
-        const data = await response.json();
-        allImages = data.images || [];
-        const folders = data.folders || [];
+        // Filter the response into folders and images
+        const folders = data.filter(item => item.type === 'folder');
+        const images = data.filter(item => item.type === 'image');
+        
+        allImages = images;
         
         if (allImages.length === 0 && folders.length === 0) {
             showNoImages();
@@ -349,12 +357,10 @@ async function loadThumbnails() {
         }
         
         let galleryHTML = '';
-        
-        // Add folders first
+          // Add folders first
         folders.forEach(folder => {
-            const folderPath = currentFolder ? `${currentFolder}/${folder.name}` : folder.name;
             galleryHTML += `
-                <div class="folder-item" onclick="navigateToFolder('${folderPath}')">
+                <div class="folder-item" onclick="navigateToFolder('${folder.path}')">
                     <div class="folder-icon">
                         <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M10 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2h-8l-2-2z"/>
@@ -369,8 +375,8 @@ async function loadThumbnails() {
         allImages.forEach((image, index) => {
             galleryHTML += `
                 <div class="image-item" onclick="showFullscreen('/image/${encodeURIComponent(image.path)}')">
-                    <img src="${image.thumbnail}" alt="${image.name}" loading="lazy">
-                    <div class="image-name">${image.name}</div>
+                    <img src="${image.thumbnail}" alt="${image.filename}" loading="lazy">
+                    <div class="image-name">${image.filename}</div>
                 </div>
             `;
         });
