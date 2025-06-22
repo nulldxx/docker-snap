@@ -1,4 +1,5 @@
-# 🖼️ docker-snap web app
+# ![icon](https://github.com/user-attachments/assets/0f6efd89-75b1-4180-b326-cf057b78971d)
+ docker-snap web app
 
 A beautiful, responsive image gallery web application built with Python Flask that runs in a lightweight Docker container. Display your local images as thumbnails with adjustable sizes and click to view full-size images.
 
@@ -51,16 +52,15 @@ Add your images to the `sample-images` folder and refresh the page!
 
 ## ✨ Features
 
-- **Production Ready**: Uses Gunicorn WSGI server for production deployment
-- **Authentication**: Basic login system with configurable credentials
+- **Thumbnail Slider**: 5 different thumbnail sizes (Tiny, Small, Medium, Large, Extra Large)
+- **Fullscreen Slideshow**: Click any thumbnail to view images in fullscreen mode with navigation
+- **Docker Ready**: Lightweight containerized deployment, cross-platform with health monitoring
+- **Authentication**: Basic login system with configurable credentials via docker config
 - **Responsive Design**: Modern, mobile-friendly interface with YouTube-inspired dark theme
 - **Subfolder Navigation**: Browse through nested directories with folder icons and breadcrumb navigation
-- **Fullscreen Slideshow**: Click any thumbnail to view images in fullscreen mode with navigation
-- **Thumbnail Slider**: 5 different thumbnail sizes (Tiny, Small, Medium, Large, Extra Large)
 - **Auto-Refresh**: Automatically detects new images every 30 seconds
 - **Multiple Formats**: Supports PNG, JPEG, GIF, BMP, and WebP
-- **Docker Ready**: Lightweight containerized deployment with health monitoring
-- **Security**: Non-root user execution, authentication, and secure file serving
+- **Production Ready**: Uses Gunicorn WSGI server for production deployment
 
 ## 🚀 Quick Start
 
