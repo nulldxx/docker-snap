@@ -1,5 +1,4 @@
-# ![icon](https://github.com/user-attachments/assets/0f6efd89-75b1-4180-b326-cf057b78971d)
- docker-snap web app
+# ![icon](https://github.com/user-attachments/assets/0f6efd89-75b1-4180-b326-cf057b78971d) docker-snap web app
 
 A beautiful, responsive image gallery web application built with Python Flask that runs in a lightweight Docker container. Display your local images as thumbnails with adjustable sizes and click to view full-size images.
 
