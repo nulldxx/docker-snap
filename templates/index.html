@@ -575,6 +575,7 @@
             <button class="slideshow-nav-btn" id="prevBtn">⏮️</button>
             <button class="slideshow-nav-btn" id="playPauseBtn">⏸️</button>
             <button class="slideshow-nav-btn" id="nextBtn">⏭️</button>
+            <button class="slideshow-nav-btn" id="fullscreenBtn">⛶</button>
             <button class="slideshow-nav-btn" id="exitBtn">❌</button>
         </div>
         <div class="slideshow-info" id="slideshowInfo">
@@ -599,6 +600,7 @@
         const prevBtn = document.getElementById('prevBtn');
         const playPauseBtn = document.getElementById('playPauseBtn');
         const nextBtn = document.getElementById('nextBtn');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
         const exitBtn = document.getElementById('exitBtn');
         const imageCounter = document.getElementById('imageCounter');
         const imageName = document.getElementById('imageName');
@@ -620,6 +622,7 @@
         let slideshowInterval = 5; // seconds
         let currentImageIndex = 0;
         let slideshowImages = []; // Ordered/shuffled images for slideshow
+        let isFullscreen = false; // Track fullscreen state
 
         // Get current folder from URL
         function getCurrentFolder() {
@@ -659,6 +662,36 @@
 
         function updateSlideshowDisplay() {
             slideshowDisplay.textContent = `${slideshowInterval}s`;
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                // Enter fullscreen
+                fullscreenOverlay.requestFullscreen().then(() => {
+                    isFullscreen = true;
+                    fullscreenBtn.textContent = '⛷';
+                }).catch(err => {
+                    console.error('Error attempting to enable fullscreen:', err);
+                });
+            } else {
+                // Exit fullscreen
+                document.exitFullscreen().then(() => {
+                    isFullscreen = false;
+                    fullscreenBtn.textContent = '⛶';
+                }).catch(err => {
+                    console.error('Error attempting to exit fullscreen:', err);
+                });
+            }
+        }
+
+        function updateFullscreenButton() {
+            if (document.fullscreenElement) {
+                fullscreenBtn.textContent = '⛷';
+                isFullscreen = true;
+            } else {
+                fullscreenBtn.textContent = '⛶';
+                isFullscreen = false;
+            }
         }
 
         function shuffleArray(array) {
@@ -744,6 +777,12 @@
         function stopSlideshow() {
             slideshowActive = false;
             stopSlideshowTimer();
+            
+            // Exit fullscreen if active
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            }
+            
             hideFullscreen();
             slideshowBtn.textContent = '▶️ Start Slideshow';
             slideshowBtn.disabled = false;
@@ -923,6 +962,11 @@
             }
         });
 
+        fullscreenBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            toggleFullscreen();
+        });
+
         exitBtn.addEventListener('click', function(e) {
             e.stopPropagation();
             stopSlideshow();
@@ -973,8 +1017,18 @@
                         e.preventDefault();
                         playPauseBtn.click();
                         break;
+                    case 'f':
+                    case 'F':
+                        e.preventDefault();
+                        toggleFullscreen();
+                        break;
                 }
             }
+        });
+
+        // Listen for fullscreen changes
+        document.addEventListener('fullscreenchange', function() {
+            updateFullscreenButton();
         });
 
         // Initialize
