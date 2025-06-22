@@ -5,11 +5,11 @@ services:
     build: .
     container_name: img-gallery
     ports:
-      - "5000:5000"
-    volumes:
+      - "5000:5000"    volumes:
       # Mount your local images directory to /images in the container
       # Replace './sample-images' with the path to your images folder
-      - ./sample-images:/images:ro    restart: unless-stopped
+      - ./sample-images:/images:ro
+    restart: unless-stopped
     environment:
       - FLASK_ENV=production
       - GALLERY_USERNAME=user
