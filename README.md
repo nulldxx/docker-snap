@@ -75,9 +75,9 @@ Add your images to the `sample-images` folder and refresh the page!
    ```yaml
    version: '3.8'
    services:
-     img-gallery:
+     docker-snap:
        image: nerwander/docker-snap:latest
-       container_name: img-gallery
+       container_name: docker-snap
        ports:
          - "5000:5000"
        volumes:
@@ -127,7 +127,7 @@ Add your images to the `sample-images` folder and refresh the page!
 1. **Run the container**:
    ```bash
    docker run -d \
-     --name img-gallery \
+     --name docker-snap \
      -p 5000:5000 \
      -v /path/to/your/images:/images:ro \
      -e GALLERY_USERNAME=your-username \
@@ -144,7 +144,7 @@ Add your images to the `sample-images` folder and refresh the page!
    **Windows** (PowerShell):
    ```powershell
    docker run -d `
-     --name img-gallery `
+     --name docker-snap `
      -p 5000:5000 `
      -v "C:\Users\YourName\Pictures:/images:ro" `
      -e GALLERY_USERNAME=admin `
@@ -155,7 +155,7 @@ Add your images to the `sample-images` folder and refresh the page!
    **macOS/Linux**:
    ```bash
    docker run -d \
-     --name img-gallery \
+     --name docker-snap \
      -p 5000:5000 \
      -v "$HOME/Pictures:/images:ro" \
      -e GALLERY_USERNAME=admin \
@@ -180,12 +180,12 @@ If you want to modify the application:
 
 3. **Build your own image**:
    ```bash
-   docker build -t my-img-gallery .
+   docker build -t my-docker-snap .
    ```
 
 4. **Update docker-compose.yml** to use your custom image:
    ```yaml
-   image: my-img-gallery
+   image: my-docker-snap
    # instead of: image: nerwander/docker-snap:latest
    ```
 
@@ -342,7 +342,7 @@ docker-compose up -d
 - Check if port 5000 is available: `docker ps` or `netstat -an | grep 5000`
 - Verify Docker is running properly: `docker --version`
 - Check the health endpoint: http://localhost:5000/health
-- View container logs: `docker-compose logs img-gallery`
+- View container logs: `docker-compose logs docker-snap`
 
 ### Authentication issues?
 - Verify your username and password in environment variables
@@ -352,7 +352,7 @@ docker-compose up -d
 ### Performance issues?
 - Large image files may take longer to load
 - Consider optimizing images before adding them
-- Monitor container resource usage: `docker stats img-gallery`
+- Monitor container resource usage: `docker stats docker-snap`
 - Ensure sufficient disk space for Docker volumes
 
 ## 📝 License
@@ -371,7 +371,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 For issues and questions:
 1. Check the troubleshooting section above
-2. Review the application logs: `docker-compose logs img-gallery`
+2. Review the application logs: `docker-compose logs docker-snap`
 3. Visit the Docker Hub page: https://hub.docker.com/r/nerwander/docker-snap
 4. Create an issue in the repository
 

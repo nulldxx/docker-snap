@@ -1,9 +1,9 @@
 version: '3.8'
 
 services:
-  img-gallery:
+  docker-snap:
     image: nerwander/docker-snap:latest
-    container_name: img-gallery
+    container_name: docker-snap
     ports:
       - "5000:5000"
     volumes:
