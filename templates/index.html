@@ -143,16 +143,87 @@
             height: auto;
             border-radius: 4px;
             transition: all 0.2s ease;
+        }        .folder-item {
+            background: #212121;
+            border-radius: 8px;
+            padding: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            transition: all 0.2s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #303030;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 120px;
+            width: 100%;
         }
 
-        .image-name {
+        .folder-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+            background: #2a2a2a;
+        }
+
+        .folder-icon {
+            color: #ff6b00;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+        }        .folder-name {
+            font-size: 0.9rem !important;
+            color: #f1f1f1 !important;
+            text-align: center;
+            font-weight: 500;
+            word-break: break-word;
+            line-height: 1.3;
+            max-height: 4em;
+            overflow: hidden;
+            margin-top: 8px;
+            width: 100%;
+            padding: 0 4px;
+            display: block;
+        }
+
+        .breadcrumb {
+            margin-bottom: 20px;
+            padding: 12px 16px;
+            background: #212121;
+            border-radius: 8px;
+            border: 1px solid #303030;
+        }
+
+        .breadcrumb-item {
+            display: inline-block;
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb-item:not(:last-child):after {
+            content: " / ";
+            color: #666;
+            margin: 0 5px;
+        }
+
+        .breadcrumb-link {
+            color: #ff0000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .breadcrumb-link:hover {
+            text-decoration: underline;
+        }        .image-name {
             margin-top: 8px;
             font-size: 0.85rem;
             color: #f1f1f1;
             text-align: center;
             font-weight: 400;
             word-break: break-word;
-        }        .loading {
+        }.loading {
             text-align: center;
             padding: 50px;
             color: #aaa;
@@ -230,9 +301,16 @@
         }
     </style>
 </head>
-<body>
-    <div class="container">
+<body>    <div class="container">
         <h1>🖼️ Image Gallery</h1>
+        
+        <!-- Breadcrumb Navigation -->
+        <div class="breadcrumb" id="breadcrumb" style="display: none;">
+            <span class="breadcrumb-item">
+                <a href="/" class="breadcrumb-link">Home</a>
+            </span>
+            <div id="breadcrumbPath"></div>
+        </div>
         
         <div class="controls">
             <div class="slider-container">
@@ -259,12 +337,12 @@
 
     <div class="fullscreen-overlay" id="fullscreenOverlay">
         <img class="fullscreen-image" id="fullscreenImage" src="" alt="">
-    </div>
-
-    <script>
+    </div>    <script>
         const sizeSlider = document.getElementById('sizeSlider');
         const sizeDisplay = document.getElementById('sizeDisplay');
         const gallery = document.getElementById('gallery');
+        const breadcrumb = document.getElementById('breadcrumb');
+        const breadcrumbPath = document.getElementById('breadcrumbPath');
         const fullscreenOverlay = document.getElementById('fullscreenOverlay');
         const fullscreenImage = document.getElementById('fullscreenImage');
 
@@ -278,6 +356,43 @@
         };
 
         let currentSize = 3;
+        let currentFolder = '';
+
+        // Get current folder from URL
+        function getCurrentFolder() {
+            const path = window.location.pathname;
+            if (path.startsWith('/folder/')) {
+                return path.substring(8); // Remove '/folder/' prefix
+            }
+            return '';
+        }
+
+        function updateBreadcrumb() {
+            if (!currentFolder) {
+                breadcrumb.style.display = 'none';
+                return;
+            }
+
+            breadcrumb.style.display = 'block';
+            const parts = currentFolder.split('/');
+            let path = '';
+            let breadcrumbHTML = '';
+
+            parts.forEach((part, index) => {
+                path = path ? `${path}/${part}` : part;
+                breadcrumbHTML += `<span class="breadcrumb-item">`;
+                
+                if (index === parts.length - 1) {
+                    breadcrumbHTML += `<span class="breadcrumb-current">${part}</span>`;
+                } else {
+                    breadcrumbHTML += `<a href="/folder/${path}" class="breadcrumb-link">${part}</a>`;
+                }
+                
+                breadcrumbHTML += `</span>`;
+            });
+
+            breadcrumbPath.innerHTML = breadcrumbHTML;
+        }
 
         function updateSizeDisplay() {
             const size = sizeMap[currentSize];
@@ -296,9 +411,13 @@
         function showNoImages() {
             gallery.innerHTML = `
                 <div class="no-images">
-                    📁 No images found in the /images folder
+                    📁 No images found in this folder
                 </div>
             `;
+        }
+
+        function navigateToFolder(folderPath) {
+            window.location.href = `/folder/${folderPath}`;
         }
 
         async function loadThumbnails() {
@@ -306,7 +425,11 @@
             
             try {
                 const size = sizeMap[currentSize].pixels;
-                const response = await fetch(`/api/thumbnails/${size}`);
+                const url = currentFolder ? 
+                    `/api/thumbnails/${size}/${currentFolder}` : 
+                    `/api/thumbnails/${size}`;
+                    
+                const response = await fetch(url);
                 const thumbnails = await response.json();
 
                 if (thumbnails.length === 0) {
@@ -314,18 +437,39 @@
                     return;
                 }
 
-                gallery.innerHTML = '';
-                
-                thumbnails.forEach(item => {
-                    const imageItem = document.createElement('div');
-                    imageItem.className = 'image-item';
+                gallery.innerHTML = '';                thumbnails.forEach(item => {
+                    console.log('Processing item:', item); // Debug log
                     
-                    imageItem.innerHTML = `
-                        <img src="${item.thumbnail}" alt="${item.filename}" onclick="showFullscreen('/images/${item.filename}')">
-                        <div class="image-name">${item.filename}</div>
-                    `;
-                    
-                    gallery.appendChild(imageItem);
+                    if (item.type === 'folder') {
+                        // Create folder item with dynamic sizing
+                        const folderItem = document.createElement('div');
+                        folderItem.className = 'folder-item';
+                        folderItem.onclick = () => navigateToFolder(item.path);                        // Calculate icon size based on thumbnail size
+                        const iconSize = Math.max(40, size * 0.4); // Minimum 40px, scales with size
+                        const fontSize = 0.9; // Fixed readable font size
+                        const folderHeight = Math.max(120, size + 60); // Dynamic height based on thumbnail size
+                        
+                        console.log(`Creating folder: ${item.name}, iconSize: ${iconSize}, fontSize: ${fontSize}, height: ${folderHeight}`); // Debug
+                        
+                        folderItem.style.minHeight = `${folderHeight}px`;
+                        folderItem.innerHTML = `
+                            <div class="folder-icon" style="font-size: ${iconSize}px;">📁</div>
+                            <div class="folder-name" style="font-size: ${fontSize}rem; color: #f1f1f1 !important; background: rgba(255,0,0,0.1);">${item.name}</div>
+                        `;
+                        
+                        gallery.appendChild(folderItem);
+                    } else {
+                        // Create image item
+                        const imageItem = document.createElement('div');
+                        imageItem.className = 'image-item';
+                        
+                        imageItem.innerHTML = `
+                            <img src="${item.thumbnail}" alt="${item.filename}" onclick="showFullscreen('/images/${item.path}')">
+                            <div class="image-name">${item.filename}</div>
+                        `;
+                        
+                        gallery.appendChild(imageItem);
+                    }
                 });
 
                 // Update grid columns based on thumbnail size
@@ -370,6 +514,8 @@
         });
 
         // Initialize
+        currentFolder = getCurrentFolder();
+        updateBreadcrumb();
         updateSizeDisplay();
         loadThumbnails();
 

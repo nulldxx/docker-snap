@@ -4,13 +4,15 @@ A beautiful, responsive image gallery web application built with Python Flask th
 
 ## ✨ Features
 
-- **Responsive Design**: Modern, mobile-friendly interface
+- **Responsive Design**: Modern, mobile-friendly interface with YouTube-inspired dark theme
+- **Subfolder Navigation**: Browse through nested directories with folder icons and breadcrumb navigation
 - **Thumbnail Slider**: 5 different thumbnail sizes (Tiny, Small, Medium, Large, Extra Large)
 - **Full-Screen View**: Click any thumbnail to view the full-size image
 - **Auto-Refresh**: Automatically detects new images every 30 seconds
 - **Multiple Formats**: Supports PNG, JPEG, GIF, BMP, and WebP
 - **Docker Ready**: Lightweight containerized deployment
 - **Health Monitoring**: Built-in health check endpoint
+- **Breadcrumb Navigation**: Easy navigation back to parent folders
 
 ## 🚀 Quick Start
 
@@ -108,10 +110,31 @@ The application provides 5 predefined thumbnail sizes:
 
 ## 🔧 API Endpoints
 
-- `GET /` - Main gallery interface
-- `GET /api/thumbnails/<size>` - Get thumbnails of specified size (JSON)
-- `GET /images/<filename>` - Serve full-size images
+- `GET /` - Main gallery interface (root folder)
+- `GET /folder/<path>` - Gallery interface for specific subfolder
+- `GET /api/thumbnails/<size>` - Get thumbnails from root folder (JSON)
+- `GET /api/thumbnails/<size>/<path>` - Get thumbnails from specific subfolder (JSON)
+- `GET /images/<filepath>` - Serve full-size images from any subfolder
 - `GET /health` - Health check endpoint
+
+## 📁 Folder Structure
+
+The application now supports unlimited nested subfolders. You can organize your images like this:
+
+```
+images/
+├── vacation/
+│   ├── beach-2024/
+│   └── mountains/
+├── family/
+│   ├── birthdays/
+│   └── holidays/
+└── work/
+    ├── presentations/
+    └── screenshots/
+```
+
+Simply click on folder icons to navigate into subdirectories, and use the breadcrumb navigation to go back.
 
 ## 🐳 Docker Details
 
