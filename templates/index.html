@@ -9,40 +9,38 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }        body {
+            font-family: 'Roboto', 'Arial', sans-serif;
+            background: #0f0f0f;
             min-height: 100vh;
             padding: 20px;
+            color: #f1f1f1;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            background: #181818;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
             padding: 30px;
-            backdrop-filter: blur(10px);
+            border: 1px solid #303030;
         }
 
         h1 {
             text-align: center;
-            color: #333;
+            color: #ffffff;
             margin-bottom: 30px;
             font-size: 2.5rem;
-            font-weight: 300;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .controls {
-            background: #f8f9fa;
-            border-radius: 15px;
+            font-weight: 400;
+            text-shadow: none;
+        }        .controls {
+            background: #212121;
+            border-radius: 8px;
             padding: 25px;
             margin-bottom: 30px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            border: 1px solid #303030;
         }
 
         .slider-container {
@@ -54,120 +52,118 @@
         }
 
         .slider-label {
-            font-weight: 600;
-            color: #555;
+            font-weight: 500;
+            color: #f1f1f1;
             font-size: 1.1rem;
         }
 
         .size-slider {
             width: 300px;
-            height: 8px;
-            border-radius: 5px;
-            background: #ddd;
+            height: 4px;
+            border-radius: 2px;
+            background: #4d4d4d;
             outline: none;
             appearance: none;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
         }
 
         .size-slider::-webkit-slider-thumb {
             appearance: none;
-            width: 24px;
-            height: 24px;
+            width: 16px;
+            height: 16px;
             border-radius: 50%;
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            background: #ff0000;
             cursor: pointer;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s ease;
         }
 
         .size-slider::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transform: scale(1.1);
+            background: #ff3333;
         }
 
         .size-slider::-moz-range-thumb {
-            width: 24px;
-            height: 24px;
+            width: 16px;
+            height: 16px;
             border-radius: 50%;
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            background: #ff0000;
             cursor: pointer;
             border: none;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
         }
 
         .size-display {
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            background: #ff0000;
             color: white;
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 500;
             min-width: 100px;
             text-align: center;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        .size-labels {
+            font-size: 0.9rem;
+        }        .size-labels {
             display: flex;
             justify-content: space-between;
             width: 300px;
             margin-top: 10px;
-            font-size: 0.9rem;
-            color: #666;
+            font-size: 0.8rem;
+            color: #aaa;
         }
 
         .gallery {
             display: grid;
-            gap: 20px;
+            gap: 16px;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             justify-items: center;
             padding: 20px 0;
         }
 
         .image-item {
-            background: white;
-            border-radius: 15px;
-            padding: 15px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
+            background: #212121;
+            border-radius: 8px;
+            padding: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            transition: all 0.2s ease;
             cursor: pointer;
             position: relative;
             overflow: hidden;
+            border: 1px solid #303030;
         }
 
         .image-item:hover {
-            transform: translateY(-10px) scale(1.05);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+            background: #2a2a2a;
         }
 
         .image-item img {
             width: 100%;
             height: auto;
-            border-radius: 10px;
-            transition: all 0.3s ease;
+            border-radius: 4px;
+            transition: all 0.2s ease;
         }
 
         .image-name {
-            margin-top: 10px;
-            font-size: 0.9rem;
-            color: #555;
+            margin-top: 8px;
+            font-size: 0.85rem;
+            color: #f1f1f1;
             text-align: center;
-            font-weight: 500;
+            font-weight: 400;
             word-break: break-word;
-        }
-
-        .loading {
+        }        .loading {
             text-align: center;
             padding: 50px;
-            color: #666;
+            color: #aaa;
             font-size: 1.2rem;
         }
 
         .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #667eea;
+            width: 40px;
+            height: 40px;
+            border: 3px solid #333;
+            border-top: 3px solid #ff0000;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin: 20px auto;
@@ -183,16 +179,14 @@
             padding: 50px;
             color: #888;
             font-size: 1.1rem;
-        }
-
-        .fullscreen-overlay {
+        }        .fullscreen-overlay {
             display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.95);
             z-index: 1000;
             cursor: pointer;
         }
@@ -202,13 +196,16 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            max-width: 90vw;
-            max-height: 90vh;
-            border-radius: 10px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-        }
-
-        @media (max-width: 768px) {
+            max-width: 95vw;
+            max-height: 95vh;
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+        }        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
             .slider-container {
                 flex-direction: column;
                 gap: 15px;
@@ -224,7 +221,11 @@
             
             .gallery {
                 grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-                gap: 15px;
+                gap: 12px;
+            }
+
+            h1 {
+                font-size: 2rem;
             }
         }
     </style>
