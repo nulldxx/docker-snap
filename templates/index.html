@@ -431,6 +431,53 @@
             transition: opacity 0.3s ease;
         }
 
+        /* Fullscreen mode styles */
+        .fullscreen-overlay:-webkit-full-screen .fullscreen-image {
+            max-width: 100vw;
+            max-height: 100vh;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        .fullscreen-overlay:fullscreen .fullscreen-image {
+            max-width: 100vw;
+            max-height: 100vh;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        .fullscreen-overlay:-webkit-full-screen .slideshow-controls,
+        .fullscreen-overlay:-webkit-full-screen .slideshow-info {
+            display: none !important;
+        }
+
+        .fullscreen-overlay:fullscreen .slideshow-controls,
+        .fullscreen-overlay:fullscreen .slideshow-info {
+            display: none !important;
+        }
+
+        /* Fullscreen keyboard hints */
+        .fullscreen-hints {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 0.8rem;
+            display: none;
+            z-index: 1002;
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .fullscreen-hints.show {
+            opacity: 1;
+        }
+
         .slideshow-controls {
             position: fixed;
             bottom: 30px;
@@ -581,6 +628,9 @@
         <div class="slideshow-info" id="slideshowInfo">
             <span id="imageCounter">1 / 1</span> - <span id="imageName">Image Name</span>
         </div>
+        <div class="fullscreen-hints" id="fullscreenHints">
+            ← → Navigate | Space: Pause | F: Toggle Fullscreen | Q: Exit | Esc: Exit
+        </div>
     </div>    <script>
         const sizeSlider = document.getElementById('sizeSlider');
         const sizeDisplay = document.getElementById('sizeDisplay');
@@ -604,6 +654,7 @@
         const exitBtn = document.getElementById('exitBtn');
         const imageCounter = document.getElementById('imageCounter');
         const imageName = document.getElementById('imageName');
+        const fullscreenHints = document.getElementById('fullscreenHints');
 
         // Size mapping: slider value to actual pixel size and display name
         const sizeMap = {
@@ -670,6 +721,7 @@
                 fullscreenOverlay.requestFullscreen().then(() => {
                     isFullscreen = true;
                     fullscreenBtn.textContent = '⛷';
+                    showFullscreenHints();
                 }).catch(err => {
                     console.error('Error attempting to enable fullscreen:', err);
                 });
@@ -678,6 +730,7 @@
                 document.exitFullscreen().then(() => {
                     isFullscreen = false;
                     fullscreenBtn.textContent = '⛶';
+                    hideFullscreenHints();
                 }).catch(err => {
                     console.error('Error attempting to exit fullscreen:', err);
                 });
@@ -688,10 +741,35 @@
             if (document.fullscreenElement) {
                 fullscreenBtn.textContent = '⛷';
                 isFullscreen = true;
+                showFullscreenHints();
             } else {
                 fullscreenBtn.textContent = '⛶';
                 isFullscreen = false;
+                hideFullscreenHints();
             }
+        }
+
+        function showFullscreenHints() {
+            if (document.fullscreenElement) {
+                fullscreenHints.style.display = 'block';
+                setTimeout(() => {
+                    fullscreenHints.classList.add('show');
+                }, 100);
+                
+                // Hide hints after 4 seconds
+                setTimeout(() => {
+                    hideFullscreenHints();
+                }, 4000);
+            }
+        }
+
+        function hideFullscreenHints() {
+            fullscreenHints.classList.remove('show');
+            setTimeout(() => {
+                if (!fullscreenHints.classList.contains('show')) {
+                    fullscreenHints.style.display = 'none';
+                }
+            }, 300);
         }
 
         function shuffleArray(array) {
@@ -1003,17 +1081,28 @@
                     hideFullscreen();
                 }
             } else if (slideshowActive) {
+                // Show hints briefly when user presses any key in fullscreen
+                if (document.fullscreenElement && e.key !== 'Tab' && e.key !== 'Shift' && e.key !== 'Control' && e.key !== 'Alt') {
+                    showFullscreenHints();
+                }
+                
                 // Slideshow keyboard controls
                 switch(e.key) {
                     case 'ArrowLeft':
+                    case 'a':
+                    case 'A':
                         e.preventDefault();
                         prevSlideshowImage();
                         break;
                     case 'ArrowRight':
+                    case 'd':
+                    case 'D':
                         e.preventDefault();
                         nextSlideshowImage();
                         break;
                     case ' ':
+                    case 'p':
+                    case 'P':
                         e.preventDefault();
                         playPauseBtn.click();
                         break;
@@ -1021,6 +1110,11 @@
                     case 'F':
                         e.preventDefault();
                         toggleFullscreen();
+                        break;
+                    case 'q':
+                    case 'Q':
+                        e.preventDefault();
+                        stopSlideshow();
                         break;
                 }
             }
