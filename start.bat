@@ -1,5 +1,5 @@
 @echo off
-echo 🖼️  Image Gallery Docker Setup
+echo 🖼️  docker-snap docker setup
 echo ================================
 
 REM Check if Docker is running
@@ -18,12 +18,12 @@ if not exist "sample-images" (
 )
 
 REM Build and run with Docker Compose
-echo 🔨 Building and starting the image gallery...
+echo 🔨 Building and starting the docker-snap...
 docker-compose up --build -d
 
 if %errorlevel% equ 0 (
     echo.
-    echo 🎉 Image Gallery is now running!
+    echo 🎉 docker-snap is now running!
     echo 📱 Access your gallery at: http://localhost:5000
     echo.
     echo 📁 Add images to the 'sample-images' directory to see them in the gallery
@@ -32,7 +32,7 @@ if %errorlevel% equ 0 (
     echo 🛑 To stop the gallery, run: docker-compose down
     echo 📊 To view logs, run: docker-compose logs -f
 ) else (
-    echo ❌ Failed to start the image gallery. Check the logs for errors.
+    echo ❌ Failed to start the docker-snap. Check the logs for errors.
     docker-compose logs
 )
 

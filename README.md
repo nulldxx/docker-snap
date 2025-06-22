@@ -1,4 +1,4 @@
-# 🖼️ Image Gallery Web App
+# 🖼️ docker-snap web app
 
 A beautiful, responsive image gallery web application built with Python Flask that runs in a lightweight Docker container. Display your local images as thumbnails with adjustable sizes and click to view full-size images.
 
