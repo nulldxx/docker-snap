@@ -192,3 +192,13 @@ cython_debug/
 #  refer to https://docs.cursor.com/context/ignore-files
 .cursorignore
 .cursorindexingignore
+
+# Docker and user-specific files
+sample-images/
+user-images/
+*.bak
+.DS_Store
+Thumbs.db
+
+# Setup script logs
+setup.log
