@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Gallery</title>
+    <link rel="icon" type="image/png" href="/icon.png">
+    <link rel="shortcut icon" type="image/png" href="/icon.png">
     <style>
         * {
             margin: 0;
@@ -597,7 +599,10 @@
 </head>
 <body>    <div class="container">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-            <h1 style="margin: 0;">🖼️ Image Gallery</h1>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <img src="/icon.png" alt="Gallery Icon" style="width: 48px; height: 48px; border-radius: 6px;">
+                <h1 style="margin: 0;">Image Gallery</h1>
+            </div>
             <a href="/logout" style="color: #ff0000; text-decoration: none; padding: 8px 16px; border: 1px solid #ff0000; border-radius: 6px; font-size: 0.9rem; transition: all 0.2s ease;" onmouseover="this.style.background='#ff0000'; this.style.color='white';" onmouseout="this.style.background='transparent'; this.style.color='#ff0000';">
                 Logout
             </a>

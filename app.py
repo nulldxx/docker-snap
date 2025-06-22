@@ -130,6 +130,13 @@ def logout():
     session.pop('authenticated', None)
     return redirect(url_for('login'))
 
+@app.route('/favicon.ico')
+@app.route('/icon.png')
+def serve_icon():
+    """Serve the gallery icon"""
+    icon_path = os.path.join(os.path.dirname(__file__), 'icons')
+    return send_from_directory(icon_path, 'icon.png', mimetype='image/png')
+
 @app.route('/')
 @app.route('/folder/')
 @app.route('/folder/<path:subfolder>')

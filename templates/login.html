@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+<head>    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Gallery - Login</title>
+    <link rel="icon" type="image/png" href="/icon.png">
+    <link rel="shortcut icon" type="image/png" href="/icon.png">
     <style>
         * {
             margin: 0;
@@ -111,11 +112,11 @@
             color: #ff6666;
             font-size: 0.9rem;
             text-align: center;
-        }
-
-        .gallery-icon {
-            font-size: 3rem;
+        }        .gallery-icon {
+            width: 64px;
+            height: 64px;
             margin-bottom: 20px;
+            border-radius: 8px;
         }
 
         @media (max-width: 480px) {
@@ -130,10 +131,9 @@
         }
     </style>
 </head>
-<body>
-    <div class="login-container">
+<body>    <div class="login-container">
         <div class="login-header">
-            <div class="gallery-icon">🖼️</div>
+            <img src="/icon.png" alt="Gallery Icon" class="gallery-icon">
             <h1>Image Gallery</h1>
             <p>Please sign in to continue</p>
         </div>
