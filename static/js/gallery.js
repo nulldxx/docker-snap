@@ -445,7 +445,7 @@ playPauseBtn.addEventListener('click', function(e) {
     e.stopPropagation();    if (slideshowTimer) {
         // Pause
         stopSlideshowTimer();
-        playPauseBtn.textContent = '▷';
+        playPauseBtn.textContent = '▶️';
     } else {
         // Play
         startSlideshowTimer();
