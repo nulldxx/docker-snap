@@ -433,6 +433,11 @@ h1 {
     background: rgba(0, 0, 0, 0.95);
     z-index: 1000;
     cursor: pointer;
+    /* Fix for mobile artifacts */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
 }
 
 .fullscreen-image {
@@ -445,6 +450,10 @@ h1 {
     border-radius: 8px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
     transition: opacity 0.3s ease;
+    /* Fix for mobile rendering */
+    -webkit-transform: translate(-50%, -50%);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
 }
 
 /* Fullscreen mode styles */
@@ -534,6 +543,10 @@ h1 {
     display: none;
     gap: 15px;
     z-index: 1001;
+    /* Fix for mobile rendering */
+    -webkit-transform: translateX(-50%);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
 }
 
 .slideshow-nav-btn {
@@ -546,6 +559,9 @@ h1 {
     font-size: 1.2rem;
     transition: all 0.2s ease;
     backdrop-filter: blur(10px);
+    /* Fix for mobile rendering */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
 }
 
 .slideshow-nav-btn:hover {
@@ -713,5 +729,89 @@ h1 {
         font-size: 0.85rem;
         padding: 0 10px;
         text-align: center;
+    }
+    
+    /* Mobile-specific fullscreen fixes */
+    .fullscreen-overlay {
+        /* Use viewport units that work better on mobile */
+        height: 100vh;
+        height: 100dvh; /* Dynamic viewport height */
+        /* Disable backdrop-filter on mobile as it can cause artifacts */
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+    
+    .fullscreen-image {
+        /* Better mobile positioning */
+        max-width: 98vw;
+        max-height: 98vh;
+        max-height: 98dvh;
+        /* Force hardware acceleration */
+        will-change: transform;
+        -webkit-transform: translate3d(-50%, -50%, 0);
+        transform: translate3d(-50%, -50%, 0);
+    }
+}
+
+/* iOS-specific fixes */
+@supports (-webkit-touch-callout: none) {
+    .fullscreen-overlay {
+        /* Fix for iOS Safari viewport issues */
+        height: 100vh;
+        height: -webkit-fill-available;
+        /* Prevent bouncing */
+        -webkit-overflow-scrolling: touch;
+        overflow: hidden;
+    }
+    
+    .fullscreen-image {
+        /* Better iOS positioning */
+        -webkit-transform: translate3d(-50%, -50%, 0);
+        transform: translate3d(-50%, -50%, 0);
+        /* Prevent image selection on iOS */
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
+    }
+}
+
+/* Mobile-specific fixes to prevent rendering artifacts */
+@media only screen and (max-device-width: 768px) {
+    .slideshow-nav-btn {
+        /* Disable backdrop-filter on mobile as it causes artifacts */
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        /* Use solid background instead */
+        background: rgba(0, 0, 0, 0.9);
+    }
+    
+    .fullscreen-hints {
+        /* Disable backdrop-filter on mobile */
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background: rgba(0, 0, 0, 0.9);
+    }
+    
+    .slideshow-info {
+        /* Ensure no rendering issues */
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+        will-change: transform;
+    }
+}
+
+/* Touch device specific fixes */
+@media (hover: none) and (pointer: coarse) {
+    .slideshow-nav-btn {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background: rgba(0, 0, 0, 0.9);
+    }
+    
+    .fullscreen-overlay {
+        /* Force hardware acceleration for touch devices */
+        will-change: transform;
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
     }
 }
