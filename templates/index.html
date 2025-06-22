@@ -596,7 +596,12 @@
     </style>
 </head>
 <body>    <div class="container">
-        <h1>🖼️ Image Gallery</h1>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <h1 style="margin: 0;">🖼️ Image Gallery</h1>
+            <a href="/logout" style="color: #ff0000; text-decoration: none; padding: 8px 16px; border: 1px solid #ff0000; border-radius: 6px; font-size: 0.9rem; transition: all 0.2s ease;" onmouseover="this.style.background='#ff0000'; this.style.color='white';" onmouseout="this.style.background='transparent'; this.style.color='#ff0000';">
+                Logout
+            </a>
+        </div>
         
         <!-- Breadcrumb Navigation -->
         <div class="breadcrumb" id="breadcrumb" style="display: none;">

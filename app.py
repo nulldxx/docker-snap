@@ -1,15 +1,30 @@
-from flask import Flask, render_template, send_from_directory, jsonify, request
+from flask import Flask, render_template, send_from_directory, jsonify, request, session, redirect, url_for
 import os
 from PIL import Image
 import io
 import base64
 from urllib.parse import unquote, quote
+from functools import wraps
 
 app = Flask(__name__)
 
 # Configuration
 IMAGES_FOLDER = '/images'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'}
+
+# Get authentication credentials from environment variables
+USERNAME = os.environ.get('GALLERY_USERNAME', 'user')
+PASSWORD = os.environ.get('GALLERY_PASSWORD', 'password')
+app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-change-this-in-production')
+
+def login_required(f):
+    """Decorator to require authentication for routes"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('authenticated'):
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -93,9 +108,32 @@ def create_thumbnail(image_path, size):
         print(f"Error creating thumbnail for {image_path}: {e}")
         return None
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """Login page"""
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        if username == USERNAME and password == PASSWORD:
+            session['authenticated'] = True
+            next_page = request.args.get('next')
+            return redirect(next_page) if next_page else redirect(url_for('index'))
+        else:
+            return render_template('login.html', error='Invalid username or password')
+    
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    """Logout and clear session"""
+    session.pop('authenticated', None)
+    return redirect(url_for('login'))
+
 @app.route('/')
 @app.route('/folder/')
 @app.route('/folder/<path:subfolder>')
+@login_required
 def index(subfolder=''):
     """Main page showing image gallery with subfolder support"""
     current_path = get_safe_path(subfolder)
@@ -110,6 +148,7 @@ def index(subfolder=''):
 
 @app.route('/api/thumbnails/<int:size>')
 @app.route('/api/thumbnails/<int:size>/<path:subfolder>')
+@login_required
 def get_thumbnails(size, subfolder=''):
     """API endpoint to get thumbnails of specified size from specified folder"""
     # Validate size (between 50 and 400 pixels)
@@ -125,7 +164,6 @@ def get_thumbnails(size, subfolder=''):
             'path': f"{subfolder}/{folder}" if subfolder else folder,
             'size': size  # Pass the size to frontend
         })
-        print(f"Added folder: {folder}")  # Debug print
     
     # Add image thumbnails
     for image in images:
@@ -142,6 +180,7 @@ def get_thumbnails(size, subfolder=''):
     return jsonify(thumbnails)
 
 @app.route('/images/<path:filepath>')
+@login_required
 def serve_image(filepath):
     """Serve full-size images from any subfolder"""
     # Get the directory and filename

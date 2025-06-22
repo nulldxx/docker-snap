@@ -10,9 +10,11 @@ services:
       # Mount your local images directory to /images in the container
       # Replace './sample-images' with the path to your images folder
       - ./sample-images:/images:ro
-    restart: unless-stopped
-    environment:
+    restart: unless-stopped    environment:
       - FLASK_ENV=production
+      - GALLERY_USERNAME=user
+      - GALLERY_PASSWORD=password
+      - SECRET_KEY=your-super-secret-key-change-this-in-production
     healthcheck:
       test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:5000/health', timeout=5)"]
       interval: 30s
