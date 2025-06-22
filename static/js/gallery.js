@@ -196,7 +196,7 @@ function showSlideshowImage(index) {
     if (index >= 0 && index < slideshowImages.length) {
         currentImageIndex = index;
         const imageData = slideshowImages[currentImageIndex];
-        fullscreenImage.src = `/image/${encodeURIComponent(imageData.path)}`;
+        fullscreenImage.src = `/images/${encodeURIComponent(imageData.path)}`;
         fullscreenImage.alt = imageData.filename;
         updateSlideshowInfo();
     }
@@ -374,7 +374,7 @@ async function loadThumbnails() {
         // Add images
         allImages.forEach((image, index) => {
             galleryHTML += `
-                <div class="image-item" onclick="showFullscreen('/image/${encodeURIComponent(image.path)}')">
+                <div class="image-item" onclick="showFullscreen('/images/${encodeURIComponent(image.path)}')">
                     <img src="${image.thumbnail}" alt="${image.filename}" loading="lazy">
                     <div class="image-name">${image.filename}</div>
                 </div>
