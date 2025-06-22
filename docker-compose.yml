@@ -9,8 +9,8 @@ services:
     volumes:
       # Mount your local images directory to /images in the container
       # Replace './sample-images' with the path to your images folder
-      - ./sample-images:/images:ro
-    restart: unless-stopped    environment:
+      - ./sample-images:/images:ro    restart: unless-stopped
+    environment:
       - FLASK_ENV=production
       - GALLERY_USERNAME=user
       - GALLERY_PASSWORD=password
