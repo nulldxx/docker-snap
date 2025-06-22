@@ -6,6 +6,7 @@ An image gallery web application built with Python Flask that runs in a lightwei
 
 ## 📋 Table of Contents
 
+- [📸 Screenshot](#-screenshot)
 - [⚡ Super Quick Start](#-super-quick-start)
 - [✨ Features](#-features)
 - [🚀 Quick Start](#-quick-start)
@@ -20,7 +21,7 @@ An image gallery web application built with Python Flask that runs in a lightwei
 - [🐳 Docker Hub](#-docker-hub)
 - [🆘 Support](#-support)
 
-**Screnshot**
+## 📸 Screenshot
 
 ![image](https://github.com/user-attachments/assets/902d7ae3-4d28-43bc-bde2-e2ec2d6cf9a3)
 
