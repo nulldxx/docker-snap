@@ -3,6 +3,7 @@
 An image gallery web application built with Python Flask that runs in a lightweight Docker container. Display your local images as thumbnails with adjustable sizes and click to view full-size images or view a slideshow
 
 **Screnshot**
+
 ![image](https://github.com/user-attachments/assets/902d7ae3-4d28-43bc-bde2-e2ec2d6cf9a3)
 
 **Available on Docker Hub**: `nerwander/docker-snap:latest` - Ready to deploy with just Docker Compose!
