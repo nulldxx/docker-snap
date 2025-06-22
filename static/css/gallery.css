@@ -56,6 +56,7 @@ h1 {
 
 .size-slider {
     width: 300px;
+    max-width: 100%;
     height: 4px;
     border-radius: 2px;
     background: #4d4d4d;
@@ -141,12 +142,16 @@ h1 {
     align-items: center;
     gap: 25px;
     flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
 }
 
 .slideshow-timing {
     display: flex;
     align-items: center;
     gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .slideshow-label {
@@ -157,6 +162,8 @@ h1 {
 
 .slideshow-slider {
     width: 120px;
+    min-width: 80px;
+    max-width: 150px;
     height: 4px;
     border-radius: 2px;
     background: #4d4d4d;
@@ -575,14 +582,38 @@ h1 {
     .slideshow-settings {
         flex-direction: column;
         gap: 15px;
+        width: 100%;
+    }
+    
+    .slideshow-timing {
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
+        align-items: center;
     }
     
     .size-slider, .slideshow-slider {
-        width: 250px;
+        width: 100%;
+        max-width: 280px;
     }
     
     .size-labels {
-        width: 250px;
+        width: 100%;
+        max-width: 280px;
+    }
+    
+    .slideshow-label {
+        font-size: 0.9rem;
+        text-align: center;
+    }
+    
+    .slideshow-display {
+        margin: 0 auto;
+    }
+    
+    .slideshow-random {
+        justify-content: center;
+        width: 100%;
     }
     
     .gallery {
@@ -602,5 +633,85 @@ h1 {
     .slideshow-nav-btn {
         padding: 10px 12px;
         font-size: 1rem;
+    }
+}
+
+/* Extra small screens (phones in portrait) */
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+    
+    .container {
+        padding: 15px;
+        margin: 5px;
+    }
+    
+    .controls {
+        padding: 20px 15px;
+    }
+    
+    .slider-container {
+        gap: 12px;
+    }
+    
+    .slideshow-container {
+        gap: 12px;
+    }
+    
+    .slideshow-settings {
+        gap: 12px;
+    }
+    
+    .slideshow-timing {
+        gap: 6px;
+    }
+    
+    .size-slider, .slideshow-slider {
+        width: 100%;
+        max-width: 240px;
+    }
+    
+    .size-labels {
+        width: 100%;
+        max-width: 240px;
+    }
+    
+    .slideshow-btn {
+        width: 100%;
+        max-width: 240px;
+        text-align: center;
+    }
+    
+    .slideshow-label {
+        font-size: 0.85rem;
+    }
+    
+    .gallery {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 10px;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+    }
+    
+    .slideshow-controls {
+        bottom: 15px;
+        gap: 8px;
+        padding: 0 10px;
+    }
+
+    .slideshow-nav-btn {
+        padding: 8px 10px;
+        font-size: 0.9rem;
+        min-width: 44px; /* Ensure touch targets are big enough */
+    }
+    
+    .slideshow-info {
+        bottom: 60px;
+        font-size: 0.85rem;
+        padding: 0 10px;
+        text-align: center;
     }
 }

@@ -4,15 +4,16 @@ A beautiful, responsive image gallery web application built with Python Flask th
 
 ## ✨ Features
 
+- **Production Ready**: Uses Gunicorn WSGI server for production deployment
+- **Authentication**: Basic login system with configurable credentials
 - **Responsive Design**: Modern, mobile-friendly interface with YouTube-inspired dark theme
 - **Subfolder Navigation**: Browse through nested directories with folder icons and breadcrumb navigation
+- **Fullscreen Slideshow**: Click any thumbnail to view images in fullscreen mode with navigation
 - **Thumbnail Slider**: 5 different thumbnail sizes (Tiny, Small, Medium, Large, Extra Large)
-- **Full-Screen View**: Click any thumbnail to view the full-size image
 - **Auto-Refresh**: Automatically detects new images every 30 seconds
 - **Multiple Formats**: Supports PNG, JPEG, GIF, BMP, and WebP
-- **Docker Ready**: Lightweight containerized deployment
-- **Health Monitoring**: Built-in health check endpoint
-- **Breadcrumb Navigation**: Easy navigation back to parent folders
+- **Docker Ready**: Lightweight containerized deployment with health monitoring
+- **Security**: Non-root user execution, authentication, and secure file serving
 
 ## 🚀 Quick Start
 
@@ -35,6 +36,8 @@ A beautiful, responsive image gallery web application built with Python Flask th
 
 4. **Access the gallery**:
    - Open your browser and go to: http://localhost:5000
+   - Login with the default credentials: `user` / `password`
+   - Or set custom credentials using environment variables (see Configuration section)
 
 ### Using Docker Manually
 
@@ -73,11 +76,22 @@ A beautiful, responsive image gallery web application built with Python Flask th
 ```
 img-gallery/
 ├── app.py                 # Main Flask application
+├── gunicorn.conf.py      # Gunicorn production configuration
 ├── templates/
-│   └── index.html        # Web interface template
+│   ├── index.html        # Gallery interface template
+│   └── login.html        # Login page template
+├── static/
+│   ├── css/
+│   │   ├── gallery.css   # Gallery styles
+│   │   └── login.css     # Login page styles
+│   └── js/
+│       └── gallery.js    # Gallery JavaScript functionality
+├── icons/
+│   └── icon.png         # Application favicon
 ├── requirements.txt      # Python dependencies
 ├── Dockerfile           # Docker container configuration
 ├── docker-compose.yml   # Docker Compose setup
+├── .dockerignore        # Docker ignore file
 ├── sample-images/       # Sample images directory
 └── README.md           # This file
 ```
@@ -106,16 +120,28 @@ The application provides 5 predefined thumbnail sizes:
 
 ### Environment Variables
 
-- `FLASK_ENV`: Set to `production` for production deployment (default in Docker)
+For production deployment, configure these environment variables:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `GALLERY_USERNAME` | `user` | Username for gallery access |
+| `GALLERY_PASSWORD` | `password` | Password for gallery access |
+| `SECRET_KEY` | `your-secret-key-change-this-in-production` | Flask session secret key |
+| `FLASK_ENV` | `production` | Flask environment (set in Docker) |
+
+**Important**: Change the default credentials and secret key in production!
 
 ## 🔧 API Endpoints
 
-- `GET /` - Main gallery interface (root folder)
-- `GET /folder/<path>` - Gallery interface for specific subfolder
-- `GET /api/thumbnails/<size>` - Get thumbnails from root folder (JSON)
-- `GET /api/thumbnails/<size>/<path>` - Get thumbnails from specific subfolder (JSON)
-- `GET /images/<filepath>` - Serve full-size images from any subfolder
-- `GET /health` - Health check endpoint
+- `GET /` - Main gallery interface (root folder) - **Requires authentication**
+- `GET /folder/<path>` - Gallery interface for specific subfolder - **Requires authentication**
+- `GET /login` - Login page
+- `POST /login` - Authentication endpoint
+- `POST /logout` - Logout endpoint
+- `GET /api/thumbnails/<size>` - Get thumbnails from root folder (JSON) - **Requires authentication**
+- `GET /api/thumbnails/<size>/<path>` - Get thumbnails from specific subfolder (JSON) - **Requires authentication**
+- `GET /images/<filepath>` - Serve full-size images from any subfolder - **Requires authentication**
+- `GET /health` - Health check endpoint (public)
 
 ## 📁 Folder Structure
 
@@ -138,19 +164,23 @@ Simply click on folder icons to navigate into subdirectories, and use the breadc
 
 ## 🐳 Docker Details
 
-The application uses a multi-stage approach for an optimized, lightweight container:
+The application is production-ready with the following optimizations:
 
 - **Base Image**: Python 3.11 slim
-- **Security**: Runs as non-root user
+- **WSGI Server**: Gunicorn with optimized worker configuration
+- **Security**: Runs as non-root user with authentication
 - **Health Checks**: Built-in container health monitoring
 - **Size**: Optimized for minimal footprint
+- **Performance**: Multi-worker setup with intelligent resource scaling
 
 ## 🔒 Security Features
 
-- Non-root user execution
-- Read-only image volume mounting
-- Input validation and sanitization
-- Secure file serving
+- **Authentication**: Login system with session management
+- **Non-root user execution**: Container runs with restricted privileges
+- **Read-only image volume mounting**: Images directory mounted read-only
+- **Input validation and sanitization**: All user inputs are validated
+- **Secure file serving**: Direct file access prevention
+- **Session security**: Secure session management with configurable secret keys
 
 ## 🎨 UI Features
 
