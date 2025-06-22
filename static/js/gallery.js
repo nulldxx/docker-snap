@@ -275,9 +275,8 @@ function stopSlideshow() {
     if (fullscreenOverlay.classList.contains('mobile-fullscreen')) {
         toggleMobileFullscreen();
     }
-    
-    // Update button
-    slideshowBtn.textContent = '▶️ Start Slideshow';
+      // Update button
+    slideshowBtn.textContent = '▷ Start Slideshow';
     slideshowBtn.disabled = false;
     
     // Re-enable body scroll
@@ -290,11 +289,10 @@ function updateSizeDisplay() {
 }
 
 function updateSlideshowButton() {
-    slideshowBtn.disabled = allImages.length === 0;
-    if (allImages.length === 0) {
-        slideshowBtn.textContent = '▶️ No Images';
+    slideshowBtn.disabled = allImages.length === 0;    if (allImages.length === 0) {
+        slideshowBtn.textContent = '▷ No Images';
     } else if (!slideshowActive) {
-        slideshowBtn.textContent = '▶️ Start Slideshow';
+        slideshowBtn.textContent = '▷ Start Slideshow';
     }
 }
 
@@ -444,11 +442,10 @@ nextBtn.addEventListener('click', function(e) {
 });
 
 playPauseBtn.addEventListener('click', function(e) {
-    e.stopPropagation();
-    if (slideshowTimer) {
+    e.stopPropagation();    if (slideshowTimer) {
         // Pause
         stopSlideshowTimer();
-        playPauseBtn.textContent = '▶️';
+        playPauseBtn.textContent = '▷';
     } else {
         // Play
         startSlideshowTimer();
