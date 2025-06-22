@@ -353,12 +353,12 @@ async function loadThumbnails() {
             updateSlideshowButton();
             return;
         }
-        
-        let galleryHTML = '';
+          let galleryHTML = '';
           // Add folders first
         folders.forEach(folder => {
+            const folderSize = sizeMap[currentSize].pixels;
             galleryHTML += `
-                <div class="folder-item" onclick="navigateToFolder('${folder.path}')">
+                <div class="folder-item" style="width: ${folderSize}px;" onclick="navigateToFolder('${folder.path}')">
                     <div class="folder-icon">
                         <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M10 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2h-8l-2-2z"/>
