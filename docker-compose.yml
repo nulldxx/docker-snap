@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  img-gallery:
+    build: .
+    container_name: img-gallery
+    ports:
+      - "5000:5000"
+    volumes:
+      # Mount your local images directory to /images in the container
+      # Replace './sample-images' with the path to your images folder
+      - ./sample-images:/images:ro
+    restart: unless-stopped
+    environment:
+      - FLASK_ENV=production
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:5000/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s

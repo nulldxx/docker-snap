@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Gallery</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            font-weight: 300;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .controls {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .slider-label {
+            font-weight: 600;
+            color: #555;
+            font-size: 1.1rem;
+        }
+
+        .size-slider {
+            width: 300px;
+            height: 8px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+            appearance: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .size-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .size-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .size-slider::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .size-display {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            min-width: 100px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .size-labels {
+            display: flex;
+            justify-content: space-between;
+            width: 300px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .gallery {
+            display: grid;
+            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            justify-items: center;
+            padding: 20px 0;
+        }
+
+        .image-item {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .image-item:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        .image-item img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .image-name {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #555;
+            text-align: center;
+            font-weight: 500;
+            word-break: break-word;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+            font-size: 1.2rem;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .no-images {
+            text-align: center;
+            padding: 50px;
+            color: #888;
+            font-size: 1.1rem;
+        }
+
+        .fullscreen-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            cursor: pointer;
+        }
+
+        .fullscreen-image {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 90vw;
+            max-height: 90vh;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .slider-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .size-slider {
+                width: 250px;
+            }
+            
+            .size-labels {
+                width: 250px;
+            }
+            
+            .gallery {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖼️ Image Gallery</h1>
+        
+        <div class="controls">
+            <div class="slider-container">
+                <span class="slider-label">Thumbnail Size:</span>
+                <div>
+                    <input type="range" id="sizeSlider" class="size-slider" min="1" max="5" value="3" step="1">
+                    <div class="size-labels">
+                        <span>Small</span>
+                        <span>Medium</span>
+                        <span>Large</span>
+                    </div>
+                </div>
+                <div class="size-display" id="sizeDisplay">Medium</div>
+            </div>
+        </div>
+
+        <div id="gallery" class="gallery">
+            <div class="loading">
+                <div class="spinner"></div>
+                Loading images...
+            </div>
+        </div>
+    </div>
+
+    <div class="fullscreen-overlay" id="fullscreenOverlay">
+        <img class="fullscreen-image" id="fullscreenImage" src="" alt="">
+    </div>
+
+    <script>
+        const sizeSlider = document.getElementById('sizeSlider');
+        const sizeDisplay = document.getElementById('sizeDisplay');
+        const gallery = document.getElementById('gallery');
+        const fullscreenOverlay = document.getElementById('fullscreenOverlay');
+        const fullscreenImage = document.getElementById('fullscreenImage');
+
+        // Size mapping: slider value to actual pixel size and display name
+        const sizeMap = {
+            1: { pixels: 100, name: 'Tiny' },
+            2: { pixels: 150, name: 'Small' },
+            3: { pixels: 200, name: 'Medium' },
+            4: { pixels: 300, name: 'Large' },
+            5: { pixels: 400, name: 'Extra Large' }
+        };
+
+        let currentSize = 3;
+
+        function updateSizeDisplay() {
+            const size = sizeMap[currentSize];
+            sizeDisplay.textContent = size.name;
+        }
+
+        function showLoading() {
+            gallery.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    Loading thumbnails...
+                </div>
+            `;
+        }
+
+        function showNoImages() {
+            gallery.innerHTML = `
+                <div class="no-images">
+                    📁 No images found in the /images folder
+                </div>
+            `;
+        }
+
+        async function loadThumbnails() {
+            showLoading();
+            
+            try {
+                const size = sizeMap[currentSize].pixels;
+                const response = await fetch(`/api/thumbnails/${size}`);
+                const thumbnails = await response.json();
+
+                if (thumbnails.length === 0) {
+                    showNoImages();
+                    return;
+                }
+
+                gallery.innerHTML = '';
+                
+                thumbnails.forEach(item => {
+                    const imageItem = document.createElement('div');
+                    imageItem.className = 'image-item';
+                    
+                    imageItem.innerHTML = `
+                        <img src="${item.thumbnail}" alt="${item.filename}" onclick="showFullscreen('/images/${item.filename}')">
+                        <div class="image-name">${item.filename}</div>
+                    `;
+                    
+                    gallery.appendChild(imageItem);
+                });
+
+                // Update grid columns based on thumbnail size
+                const minWidth = Math.max(150, size + 50);
+                gallery.style.gridTemplateColumns = `repeat(auto-fill, minmax(${minWidth}px, 1fr))`;
+                
+            } catch (error) {
+                console.error('Error loading thumbnails:', error);
+                gallery.innerHTML = `
+                    <div class="loading">
+                        ❌ Error loading images. Please check if the server is running.
+                    </div>
+                `;
+            }
+        }
+
+        function showFullscreen(imageSrc) {
+            fullscreenImage.src = imageSrc;
+            fullscreenOverlay.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function hideFullscreen() {
+            fullscreenOverlay.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Event listeners
+        sizeSlider.addEventListener('input', function() {
+            currentSize = parseInt(this.value);
+            updateSizeDisplay();
+            loadThumbnails();
+        });
+
+        fullscreenOverlay.addEventListener('click', hideFullscreen);
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                hideFullscreen();
+            }
+        });
+
+        // Initialize
+        updateSizeDisplay();
+        loadThumbnails();
+
+        // Auto-refresh every 30 seconds to pick up new images
+        setInterval(loadThumbnails, 30000);
+    </script>
+</body>
+</html>
