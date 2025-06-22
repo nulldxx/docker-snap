@@ -276,10 +276,10 @@ h1 {
 }
 
 .gallery {
-    display: grid;
+    display: flex;
+    flex-wrap: wrap;
     gap: 16px;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    justify-items: center;
+    justify-content: center;
     padding: 20px 0;
 }
 
@@ -293,6 +293,7 @@ h1 {
     position: relative;
     overflow: hidden;
     border: 1px solid #303030;
+    flex: 0 0 auto;
 }
 
 .image-item:hover {
@@ -323,7 +324,9 @@ h1 {
     align-items: center;
     justify-content: space-between;
     min-height: 120px;
-    width: 100%;
+    min-width: 120px;
+    max-width: 180px;
+    flex: 0 0 auto;
 }
 
 .folder-item:hover {
@@ -631,9 +634,7 @@ h1 {
         justify-content: center;
         width: 100%;
     }
-    
-    .gallery {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      .gallery {
         gap: 12px;
     }
 
@@ -702,9 +703,7 @@ h1 {
     .slideshow-label {
         font-size: 0.85rem;
     }
-    
-    .gallery {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      .gallery {
         gap: 10px;
     }
 

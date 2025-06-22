@@ -24,10 +24,10 @@ const fullscreenHints = document.getElementById('fullscreenHints');
 
 // Size mapping: slider value to actual pixel size and display name
 const sizeMap = {
-    1: { pixels: 100, name: 'Tiny' },
-    2: { pixels: 150, name: 'Small' },
-    3: { pixels: 200, name: 'Medium' },
-    4: { pixels: 300, name: 'Large' },
+    1: { pixels: 80, name: 'Tiny' },
+    2: { pixels: 120, name: 'Small' },
+    3: { pixels: 180, name: 'Medium' },
+    4: { pixels: 280, name: 'Large' },
     5: { pixels: 400, name: 'Extra Large' }
 };
 
