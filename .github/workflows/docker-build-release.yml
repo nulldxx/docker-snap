@@ -55,4 +55,4 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
         repository: ${{ secrets.DOCKER_USERNAME }}/docker-snap
         short-description: "Docker Snap - Image Gallery"
-        readme-filepath: ./README.md
+        readme-filepath: ./README_DOCKER.md
