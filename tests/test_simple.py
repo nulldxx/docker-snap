@@ -157,6 +157,27 @@ class TestSimple(unittest.TestCase):
             self.assertIsInstance(data['images_count'], int)
             self.assertIsInstance(data['videos_count'], int)
             self.assertIsInstance(data['subfolders_count'], int)
+    
+    def test_no_cache_headers(self):
+        """Test that API endpoints include no-cache headers"""
+        with app.test_client() as client:
+            # Mock authentication by setting session
+            with client.session_transaction() as sess:
+                sess['authenticated'] = True
+            
+            # Test thumbnails endpoint
+            response = client.get('/api/thumbnails/200')
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.headers.get('Cache-Control'), 'no-cache, no-store, must-revalidate')
+            self.assertEqual(response.headers.get('Pragma'), 'no-cache')
+            self.assertEqual(response.headers.get('Expires'), '0')
+            
+            # Test change detection endpoint
+            response = client.get('/api/check-changes')
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.headers.get('Cache-Control'), 'no-cache, no-store, must-revalidate')
+            self.assertEqual(response.headers.get('Pragma'), 'no-cache')
+            self.assertEqual(response.headers.get('Expires'), '0')
 
 if __name__ == '__main__':
     unittest.main()

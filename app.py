@@ -273,7 +273,14 @@ def get_thumbnails(size, subfolder=''):
                 'size': size
             })
     
-    return jsonify(thumbnails)
+    response = jsonify(thumbnails)
+    
+    # Add no-cache headers to prevent browser caching of thumbnails
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    
+    return response
 
 @app.route('/images/<path:filepath>')
 @login_required
@@ -290,7 +297,14 @@ def serve_image(filepath):
     directory = os.path.dirname(full_path)
     filename = os.path.basename(full_path)
     
-    return send_from_directory(directory, filename)
+    response = send_from_directory(directory, filename)
+    
+    # Add no-cache headers to prevent browser caching
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    
+    return response
 
 @app.route('/videos/<path:filepath>')
 @login_required
@@ -307,7 +321,14 @@ def serve_video(filepath):
     directory = os.path.dirname(full_path)
     filename = os.path.basename(full_path)
     
-    return send_from_directory(directory, filename)
+    response = send_from_directory(directory, filename)
+    
+    # Add no-cache headers to prevent browser caching
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    
+    return response
 
 @app.route('/health')
 def health_check():
@@ -347,14 +368,25 @@ def check_changes(subfolder=''):
             except (OSError, PermissionError):
                 continue
         
-        return jsonify({
+        response = jsonify({
             'last_modified': latest_mtime,
             'item_count': item_count,
             'folder': subfolder
         })
         
+        # Add no-cache headers to ensure fresh data
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+        
+        return response
+        
     except (OSError, PermissionError) as e:
-        return jsonify({'error': 'Permission denied'}), 403
+        error_response = jsonify({'error': 'Permission denied'})
+        error_response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        error_response.headers['Pragma'] = 'no-cache'
+        error_response.headers['Expires'] = '0'
+        return error_response, 403
 
 if __name__ == '__main__':
     # Create images directory if it doesn't exist
