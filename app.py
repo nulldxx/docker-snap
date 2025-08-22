@@ -11,7 +11,7 @@ app = Flask(__name__)
 # Configuration
 IMAGES_FOLDER = os.environ.get('IMAGES_FOLDER', '/images')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'}
-VIDEO_EXTENSIONS = {'mp4', 'webm', 'ogg', 'avi', 'mov', 'mkv', 'm4v'}
+VIDEO_EXTENSIONS = {'mp4', 'webm', 'ogg', 'avi', 'mov', 'mkv', 'm4v', 'mpg', 'mpeg'}
 
 # Get authentication credentials from environment variables
 USERNAME = os.environ.get('GALLERY_USERNAME', 'user')
