@@ -390,17 +390,35 @@ async function loadThumbnails() {
         
         // Add videos
         videos.forEach((video, index) => {
-            const videoSize = sizeMap[currentSize].pixels;
-            galleryHTML += `
-                <div class="video-item" style="width: ${videoSize}px;" onclick="showVideo('/videos/${encodeURIComponent(video.path)}', '${video.filename}')">
-                    <div class="video-icon">
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M8,5.14V19.14L19,12.14L8,5.14Z" />
-                        </svg>
+            if (video.thumbnail) {
+                // Video has a thumbnail image
+                galleryHTML += `
+                    <div class="video-item image-style" onclick="showVideo('/videos/${encodeURIComponent(video.path)}', '${video.filename}')">
+                        <div class="video-thumbnail-container">
+                            <img src="${video.thumbnail}" alt="${video.filename}" loading="lazy">
+                            <div class="video-play-overlay">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="rgba(255,255,255,0.9)">
+                                    <path d="M8,5.14V19.14L19,12.14L8,5.14Z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="video-name">${video.filename}</div>
                     </div>
-                    <div class="video-name">${video.filename}</div>
-                </div>
-            `;
+                `;
+            } else {
+                // Fallback to icon if no thumbnail
+                const videoSize = sizeMap[currentSize].pixels;
+                galleryHTML += `
+                    <div class="video-item" style="width: ${videoSize}px;" onclick="showVideo('/videos/${encodeURIComponent(video.path)}', '${video.filename}')">
+                        <div class="video-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M8,5.14V19.14L19,12.14L8,5.14Z" />
+                            </svg>
+                        </div>
+                        <div class="video-name">${video.filename}</div>
+                    </div>
+                `;
+            }
         });
         
         gallery.innerHTML = galleryHTML;

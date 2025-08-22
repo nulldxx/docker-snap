@@ -5,6 +5,8 @@ import io
 import base64
 from urllib.parse import unquote, quote
 from functools import wraps
+import cv2
+import numpy as np
 
 app = Flask(__name__)
 
@@ -121,6 +123,57 @@ def create_thumbnail(image_path, size):
         print(f"Error creating thumbnail for {image_path}: {e}")
         return None
 
+def create_video_thumbnail(video_path, size):
+    """Create thumbnail from video frame"""
+    try:
+        # Open video file
+        cap = cv2.VideoCapture(video_path)
+        
+        if not cap.isOpened():
+            print(f"Error: Could not open video {video_path}")
+            return None
+        
+        # Get video properties
+        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        
+        # Skip to a frame that's likely to have content (avoid black frames at start)
+        # Try 10% into the video, or frame 30 if video is short
+        target_frame = max(30, int(total_frames * 0.1))
+        
+        # Set the frame position
+        cap.set(cv2.CAP_PROP_POS_FRAMES, target_frame)
+        
+        # Read the frame
+        ret, frame = cap.read()
+        cap.release()
+        
+        if not ret or frame is None:
+            print(f"Error: Could not read frame from {video_path}")
+            return None
+        
+        # Convert BGR to RGB (OpenCV uses BGR by default)
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        
+        # Convert numpy array to PIL Image
+        pil_image = Image.fromarray(frame_rgb)
+        
+        # Create thumbnail maintaining aspect ratio
+        pil_image.thumbnail((size, size), Image.Resampling.LANCZOS)
+        
+        # Save to bytes
+        img_io = io.BytesIO()
+        pil_image.save(img_io, 'JPEG', quality=85)
+        img_io.seek(0)
+        
+        # Encode to base64
+        img_base64 = base64.b64encode(img_io.getvalue()).decode('utf-8')
+        return f"data:image/jpeg;base64,{img_base64}"
+        
+    except Exception as e:
+        print(f"Error creating video thumbnail for {video_path}: {e}")
+        return None
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     """Login page"""
@@ -200,14 +253,25 @@ def get_thumbnails(size, subfolder=''):
                 'path': f"{subfolder}/{image}" if subfolder else image
             })
     
-    # Add video items (with icon, no thumbnail generation yet)
+    # Add video thumbnails
     for video in videos:
-        thumbnails.append({
-            'type': 'video',
-            'filename': video,
-            'path': f"{subfolder}/{video}" if subfolder else video,
-            'size': size
-        })
+        video_path = os.path.join(current_path, video)
+        thumbnail_data = create_video_thumbnail(video_path, size)
+        if thumbnail_data:
+            thumbnails.append({
+                'type': 'video',
+                'filename': video,
+                'thumbnail': thumbnail_data,
+                'path': f"{subfolder}/{video}" if subfolder else video
+            })
+        else:
+            # Fallback to icon if thumbnail generation fails
+            thumbnails.append({
+                'type': 'video',
+                'filename': video,
+                'path': f"{subfolder}/{video}" if subfolder else video,
+                'size': size
+            })
     
     return jsonify(thumbnails)
 
