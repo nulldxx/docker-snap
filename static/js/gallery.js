@@ -5,6 +5,7 @@ const breadcrumb = document.getElementById('breadcrumb');
 const breadcrumbPath = document.getElementById('breadcrumbPath');
 const fullscreenOverlay = document.getElementById('fullscreenOverlay');
 const fullscreenImage = document.getElementById('fullscreenImage');
+const fullscreenVideo = document.getElementById('fullscreenVideo');
 
 // Slideshow elements
 const slideshowBtn = document.getElementById('slideshowBtn');
@@ -310,7 +311,7 @@ function showLoading() {
 function showNoImages() {
     gallery.innerHTML = `
         <div class="no-images">
-            No images found in this folder.
+            No media files found in this folder.
         </div>
     `;
 }
@@ -349,13 +350,14 @@ async function loadThumbnails() {
         }
           const data = await response.json();
         
-        // Filter the response into folders and images
+        // Filter the response into folders, images, and videos
         const folders = data.filter(item => item.type === 'folder');
         const images = data.filter(item => item.type === 'image');
+        const videos = data.filter(item => item.type === 'video');
         
         allImages = images;
         
-        if (allImages.length === 0 && folders.length === 0) {
+        if (allImages.length === 0 && folders.length === 0 && videos.length === 0) {
             showNoImages();
             updateSlideshowButton();
             return;
@@ -386,6 +388,21 @@ async function loadThumbnails() {
             `;
         });
         
+        // Add videos
+        videos.forEach((video, index) => {
+            const videoSize = sizeMap[currentSize].pixels;
+            galleryHTML += `
+                <div class="video-item" style="width: ${videoSize}px;" onclick="showVideo('/videos/${encodeURIComponent(video.path)}', '${video.filename}')">
+                    <div class="video-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8,5.14V19.14L19,12.14L8,5.14Z" />
+                        </svg>
+                    </div>
+                    <div class="video-name">${video.filename}</div>
+                </div>
+            `;
+        });
+        
         gallery.innerHTML = galleryHTML;
         updateSlideshowButton();
         
@@ -406,15 +423,38 @@ async function loadThumbnails() {
 }
 
 function showFullscreen(imageSrc) {
+    // Hide video, show image
+    fullscreenVideo.style.display = 'none';
+    fullscreenVideo.pause();
+    fullscreenImage.style.display = 'block';
     fullscreenImage.src = imageSrc;
     fullscreenOverlay.style.display = 'block';
     document.body.style.overflow = 'hidden';
+}
+
+function showVideo(videoSrc, videoName) {
+    // Hide image, show video
+    fullscreenImage.style.display = 'none';
+    fullscreenVideo.style.display = 'block';
+    fullscreenVideo.src = videoSrc;
+    fullscreenOverlay.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    
+    // Optional: Auto-play video
+    fullscreenVideo.load();
+    fullscreenVideo.play();
 }
 
 function hideFullscreen() {
     if (!slideshowActive) {
         fullscreenOverlay.style.display = 'none';
         document.body.style.overflow = '';
+        
+        // Stop video playback when hiding
+        if (fullscreenVideo.style.display !== 'none') {
+            fullscreenVideo.pause();
+            fullscreenVideo.currentTime = 0;
+        }
     }
 }
 

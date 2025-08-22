@@ -11,6 +11,7 @@ app = Flask(__name__)
 # Configuration
 IMAGES_FOLDER = os.environ.get('IMAGES_FOLDER', '/images')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'}
+VIDEO_EXTENSIONS = {'mp4', 'webm', 'ogg', 'avi', 'mov', 'mkv', 'm4v'}
 
 # Get authentication credentials from environment variables
 USERNAME = os.environ.get('GALLERY_USERNAME', 'user')
@@ -30,6 +31,14 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def allowed_video(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in VIDEO_EXTENSIONS
+
+def is_media_file(filename):
+    """Check if file is either an image or video"""
+    return allowed_file(filename) or allowed_video(filename)
+
 def get_safe_path(relative_path):
     """Ensure the path is safe and within the images folder"""
     if not relative_path:
@@ -45,12 +54,13 @@ def get_safe_path(relative_path):
     return safe_path
 
 def get_folder_contents(folder_path):
-    """Get list of subfolders and images in the specified folder"""
+    """Get list of subfolders, images, and videos in the specified folder"""
     if not os.path.exists(folder_path):
-        return [], []
+        return [], [], []
     
     subfolders = []
     images = []
+    videos = []
     
     try:
         for item in os.listdir(folder_path):
@@ -60,12 +70,15 @@ def get_folder_contents(folder_path):
                 # Skip hidden directories
                 if not item.startswith('.'):
                     subfolders.append(item)
-            elif os.path.isfile(item_path) and allowed_file(item):
-                images.append(item)
+            elif os.path.isfile(item_path):
+                if allowed_file(item):
+                    images.append(item)
+                elif allowed_video(item):
+                    videos.append(item)
     except PermissionError:
         pass
     
-    return sorted(subfolders), sorted(images)
+    return sorted(subfolders), sorted(images), sorted(videos)
 
 def get_breadcrumb_path(current_path):
     """Generate breadcrumb navigation"""
@@ -144,11 +157,12 @@ def serve_icon():
 def index(subfolder=''):
     """Main page showing image gallery with subfolder support"""
     current_path = get_safe_path(subfolder)
-    subfolders, images = get_folder_contents(current_path)
+    subfolders, images, videos = get_folder_contents(current_path)
     breadcrumbs = get_breadcrumb_path(subfolder)
     
     return render_template('index.html', 
                          images=images, 
+                         videos=videos,
                          subfolders=subfolders,
                          current_folder=subfolder,
                          breadcrumbs=breadcrumbs)
@@ -162,8 +176,10 @@ def get_thumbnails(size, subfolder=''):
     size = max(50, min(400, size))
     
     current_path = get_safe_path(subfolder)
-    subfolders, images = get_folder_contents(current_path)
-    thumbnails = []    # Add subfolders as special items
+    subfolders, images, videos = get_folder_contents(current_path)
+    thumbnails = []
+    
+    # Add subfolders as special items
     for folder in subfolders:
         thumbnails.append({
             'type': 'folder',
@@ -184,6 +200,15 @@ def get_thumbnails(size, subfolder=''):
                 'path': f"{subfolder}/{image}" if subfolder else image
             })
     
+    # Add video items (with icon, no thumbnail generation yet)
+    for video in videos:
+        thumbnails.append({
+            'type': 'video',
+            'filename': video,
+            'path': f"{subfolder}/{video}" if subfolder else video,
+            'size': size
+        })
+    
     return jsonify(thumbnails)
 
 @app.route('/images/<path:filepath>')
@@ -203,13 +228,31 @@ def serve_image(filepath):
     
     return send_from_directory(directory, filename)
 
+@app.route('/videos/<path:filepath>')
+@login_required
+def serve_video(filepath):
+    """Serve video files from any subfolder"""
+    # Get the directory and filename
+    safe_path = get_safe_path('')
+    full_path = os.path.join(safe_path, filepath)
+    
+    # Security check
+    if not full_path.startswith(IMAGES_FOLDER):
+        return "Access denied", 403
+        
+    directory = os.path.dirname(full_path)
+    filename = os.path.basename(full_path)
+    
+    return send_from_directory(directory, filename)
+
 @app.route('/health')
 def health_check():
     """Health check endpoint"""
-    subfolders, images = get_folder_contents(IMAGES_FOLDER)
+    subfolders, images, videos = get_folder_contents(IMAGES_FOLDER)
     return jsonify({
         'status': 'healthy', 
         'images_count': len(images),
+        'videos_count': len(videos),
         'subfolders_count': len(subfolders)
     })
 
