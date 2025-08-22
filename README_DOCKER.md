@@ -1,17 +1,19 @@
-# docker-snap - Image Gallery Web App
+# docker-snap - Media Gallery Web App
 
-A lightweight, containerized image gallery built with Python Flask. Display your local images as thumbnails with adjustable sizes and enjoy fullscreen slideshow viewing.
+A lightweight, containerized media gallery built with Python Flask. Display your local images and videos as thumbnails with adjustable sizes, view images in fullscreen slideshow mode, or play videos with built-in controls.
 
 ## ✨ Features
 
 - **Thumbnail Slider**: 5 different thumbnail sizes (Tiny, Small, Medium, Large, Extra Large)
-- **Fullscreen Slideshow**: Click any thumbnail to view images in fullscreen mode with navigation
+- **Video & Image Support**: Display images as thumbnails and videos with generated thumbnails and play overlay
+- **Fullscreen Slideshow**: Click any image thumbnail to view in fullscreen mode with navigation
+- **Video Playback**: Click video thumbnails to play with native HTML5 video controls
 - **Docker Ready**: Lightweight containerized deployment, cross-platform with health monitoring
 - **Authentication**: Basic login system with configurable credentials
 - **Responsive Design**: Modern, mobile-friendly interface with dark theme
 - **Subfolder Navigation**: Browse through nested directories with folder icons and breadcrumb navigation
-- **Auto-Refresh**: Automatically detects new images every 30 seconds
-- **Multiple Formats**: Supports PNG, JPEG, GIF, BMP, and WebP
+- **Auto-Refresh**: Automatically detects new media files
+- **Multiple Formats**: Supports PNG, JPEG, GIF, BMP, WebP images and MP4, WebM, AVI, MOV, MKV videos
 - **Production Ready**: Uses Gunicorn WSGI server for production deployment
 
 ## 📸 Screenshot
@@ -95,15 +97,17 @@ docker run -d `
 
 ### Volume Mounting
 
-Mount your images directory to `/images` in the container:
+Mount your media directory to `/images` in the container:
 - **Read-only recommended**: Use `:ro` flag for security
 - **Path examples**:
   - Linux/macOS: `-v "$HOME/Pictures:/images:ro"`
   - Windows: `-v "C:\Users\YourName\Pictures:/images:ro"`
 
-### Supported Image Formats
+### Supported Media Formats
 
-PNG, JPEG, GIF, BMP, and WebP files are automatically detected and displayed.
+**Images:** PNG, JPEG, GIF, BMP, and WebP files are automatically detected and displayed.
+
+**Videos:** MP4, WebM, AVI, MOV, MKV, MPEG, M4V, and OGG video files are supported with auto-generated thumbnails.
 
 ## 🔧 Thumbnail Sizes
 
@@ -118,8 +122,8 @@ PNG, JPEG, GIF, BMP, and WebP files are automatically detected and displayed.
 ## 🔍 Troubleshooting
 
 ### No images showing up?
-- Check that your images are in the mounted directory
-- Ensure image files have supported extensions
+- Check that your media files are in the mounted directory
+- Ensure files have supported extensions
 - Verify volume mounting path is correct
 - Check directory permissions
 
@@ -129,9 +133,9 @@ PNG, JPEG, GIF, BMP, and WebP files are automatically detected and displayed.
 - Test health endpoint: `http://localhost:5000/health`
 
 ### Performance issues?
-- Large image files may take longer to load
+- Large media files may take longer to load
 - Monitor container resources: `docker stats docker-snap`
-- Consider optimizing images before mounting
+- Consider optimizing media files before mounting
 
 ## 🐳 Image Details
 

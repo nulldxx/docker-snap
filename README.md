@@ -1,6 +1,6 @@
 # ![icon](https://github.com/user-attachments/assets/0f6efd89-75b1-4180-b326-cf057b78971d) docker-snap web app
 
-An image gallery web application built with Python Flask that runs in a lightweight Docker container. Display your local images as thumbnails with adjustable sizes and click to view full-size images or view a slideshow
+A media gallery web application built with Python Flask that runs in a lightweight Docker container. Display your local images and videos as thumbnails with adjustable sizes, click to view full-size images, or play videos with built-in controls.
 
 **Available on Docker Hub**: `nerwander/docker-snap:latest` - Ready to deploy with just Docker Compose!
 
@@ -57,13 +57,15 @@ Add your images to the `sample-images` folder and refresh the page!
 ## ✨ Features
 
 - **Thumbnail Slider**: 5 different thumbnail sizes (Tiny, Small, Medium, Large, Extra Large)
+- **Video & Image Support**: Display images as thumbnails and videos with generated thumbnails and play overlay
 - **Fullscreen Slideshow**: Click any thumbnail to view images in fullscreen mode with navigation
+- **Video Playback**: Click video thumbnails to play with native HTML5 video controls
 - **Docker Ready**: Lightweight containerized deployment, cross-platform with health monitoring
 - **Authentication**: Basic login system with configurable credentials via docker config
 - **Responsive Design**: Modern, mobile-friendly interface with YouTube-inspired dark theme
 - **Subfolder Navigation**: Browse through nested directories with folder icons and breadcrumb navigation
-- **Auto-Refresh**: Automatically detects new images every 30 seconds
-- **Multiple Formats**: Supports PNG, JPEG, GIF, BMP, and WebP
+- **Auto-Refresh**: Automatically detects new media files
+- **Multiple Formats**: Supports PNG, JPEG, GIF, BMP, WebP images and MP4, WebM, AVI, MOV, MKV videos
 - **Production Ready**: Uses Gunicorn WSGI server for production deployment
 
 ## 🚀 Quick Start
@@ -193,46 +195,6 @@ If you want to modify the application:
    # instead of: image: nerwander/docker-snap:latest
    ```
 
-## 📁 Required Files for Users
-
-When using the published Docker image, you only need:
-
-```
-your-gallery/
-├── docker-compose.yml    # Docker Compose configuration
-└── sample-images/        # Your images directory
-    ├── vacation/
-    ├── family/
-    └── work/
-```
-
-## 📁 Full Project Structure (for developers)
-
-The complete source code includes:
-
-```
-docker-snap/
-├── app.py                 # Main Flask application
-├── gunicorn.conf.py      # Gunicorn production configuration
-├── templates/
-│   ├── index.html        # Gallery interface template
-│   └── login.html        # Login page template
-├── static/
-│   ├── css/
-│   │   ├── gallery.css   # Gallery styles
-│   │   └── login.css     # Login page styles
-│   └── js/
-│       └── gallery.js    # Gallery JavaScript functionality
-├── icons/
-│   └── icon.png         # Application favicon
-├── requirements.txt      # Python dependencies
-├── Dockerfile           # Docker container configuration
-├── docker-compose.yml   # Docker Compose setup
-├── .dockerignore        # Docker ignore file
-├── sample-images/       # Sample images directory
-└── README.md           # This file
-```
-
 ## ⚙️ Configuration
 
 ### Thumbnail Sizes
@@ -247,13 +209,24 @@ The application provides 5 predefined thumbnail sizes:
 | 4    | 300px  | Large       |
 | 5    | 400px  | Extra Large |
 
-### Supported Image Formats
+### Supported Media Formats
 
+**Images:**
 - PNG (.png)
 - JPEG (.jpg, .jpeg)
 - GIF (.gif)
 - BMP (.bmp)
 - WebP (.webp)
+
+**Videos:**
+- MP4 (.mp4)
+- WebM (.webm)
+- AVI (.avi)
+- MOV (.mov)
+- MKV (.mkv)
+- MPEG (.mpg, .mpeg)
+- M4V (.m4v)
+- OGG Video (.ogg)
 
 ### Environment Variables
 
@@ -278,26 +251,8 @@ For production deployment, configure these environment variables:
 - `GET /api/thumbnails/<size>` - Get thumbnails from root folder (JSON) - **Requires authentication**
 - `GET /api/thumbnails/<size>/<path>` - Get thumbnails from specific subfolder (JSON) - **Requires authentication**
 - `GET /images/<filepath>` - Serve full-size images from any subfolder - **Requires authentication**
+- `GET /videos/<filepath>` - Serve video files from any subfolder - **Requires authentication**
 - `GET /health` - Health check endpoint (public)
-
-## 📁 Folder Structure
-
-The application now supports unlimited nested subfolders. You can organize your images like this:
-
-```
-images/
-├── vacation/
-│   ├── beach-2024/
-│   └── mountains/
-├── family/
-│   ├── birthdays/
-│   └── holidays/
-└── work/
-    ├── presentations/
-    └── screenshots/
-```
-
-Simply click on folder icons to navigate into subdirectories, and use the breadcrumb navigation to go back.
 
 ## 🐳 Docker Details
 
@@ -336,11 +291,11 @@ docker-compose down
 docker-compose up -d
 ```
 
-### No images showing up?
-- Check that your images are in the correct directory
-- Ensure image files have supported extensions (PNG, JPEG, GIF, BMP, WebP)
-- Verify volume mounting is correct: the left side should be your local images folder
-- Check permissions: make sure Docker can read your images directory
+### No files showing up?
+- Check that your media files are in the correct directory
+- Ensure files have supported extensions (images: PNG, JPEG, GIF, BMP, WebP; videos: MP4, WebM, AVI, MOV, MKV, etc.)
+- Verify volume mounting is correct: the left side should be your local media folder
+- Check permissions: make sure Docker can read your media directory
 
 ### Application not starting?
 - Check if port 5000 is available: `docker ps` or `netstat -an | grep 5000`
