@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # Mock the IMAGES_FOLDER environment variable to use a temp directory
 temp_images_dir = tempfile.mkdtemp()
 with patch.dict(os.environ, {'IMAGES_FOLDER': temp_images_dir}):
-    from app import allowed_file, allowed_video, is_media_file, get_breadcrumb_path, get_safe_path, IMAGES_FOLDER
+    from app import allowed_file, allowed_video, is_media_file, get_breadcrumb_path, get_safe_path, IMAGES_FOLDER, app
 
 class TestSimple(unittest.TestCase):
     
@@ -125,6 +125,38 @@ class TestSimple(unittest.TestCase):
             self.assertEqual(result, IMAGES_FOLDER)
             self.assertNotIn('etc', result)
             self.assertNotIn('secrets', result)
+    
+    def test_requests_module_available(self):
+        """Test that requests module is available for health checks"""
+        try:
+            import requests
+            # Test that we can create a session (basic functionality)
+            session = requests.Session()
+            self.assertIsNotNone(session)
+        except ImportError:
+            self.fail("requests module is not available - required for Docker health checks")
+    
+    def test_health_endpoint(self):
+        """Test that the health endpoint works correctly"""
+        with app.test_client() as client:
+            response = client.get('/health')
+            self.assertEqual(response.status_code, 200)
+            
+            # Check that response is JSON
+            data = response.get_json()
+            self.assertIsNotNone(data)
+            
+            # Check required fields are present
+            self.assertIn('status', data)
+            self.assertEqual(data['status'], 'healthy')
+            self.assertIn('images_count', data)
+            self.assertIn('videos_count', data)
+            self.assertIn('subfolders_count', data)
+            
+            # Check that counts are integers
+            self.assertIsInstance(data['images_count'], int)
+            self.assertIsInstance(data['videos_count'], int)
+            self.assertIsInstance(data['subfolders_count'], int)
 
 if __name__ == '__main__':
     unittest.main()

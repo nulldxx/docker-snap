@@ -37,6 +37,21 @@ try:
 except ImportError as e:
     print(f"❌ NumPy import failed: {e}")
 
+try:
+    import requests
+    print(f"✅ requests import successful (version: {requests.__version__})")
+    
+    # Test that requests can handle basic functionality (without making actual requests)
+    # This ensures the module is properly installed and functional
+    session = requests.Session()
+    print("✅ requests basic functionality works")
+    
+except ImportError as e:
+    print(f"❌ requests import failed: {e}")
+except Exception as e:
+    print(f"❌ requests functionality test failed: {e}")
+
 print("\n🔍 Summary:")
 print("All imports should work for both local development and Docker deployment")
 print("opencv-python-headless is used to avoid GUI dependencies in containers")
+print("requests is required for Docker health checks")
