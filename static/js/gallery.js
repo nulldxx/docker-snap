@@ -40,6 +40,8 @@ let slideshowInterval = 5; // seconds
 let currentImageIndex = 0;
 let slideshowImages = []; // Ordered/shuffled images for slideshow
 let isFullscreen = false; // Track fullscreen state
+let lastModified = null; // Track last modification time for change detection
+let itemCount = null; // Track item count for change detection
 
 // Get current folder from URL
 function getCurrentFolder() {
@@ -320,6 +322,11 @@ function navigateToFolder(folderPath) {
     
     // Update current folder and refresh gallery
     currentFolder = folderPath;
+    
+    // Reset change detection for new folder
+    lastModified = null;
+    itemCount = null;
+    
     updateBreadcrumb();
     loadThumbnails();
 }
@@ -381,6 +388,11 @@ async function loadThumbnails() {
         
         gallery.innerHTML = galleryHTML;
         updateSlideshowButton();
+        
+        // Initialize change detection after successful load (but don't await it)
+        if (lastModified === null || itemCount === null) {
+            checkForChanges();
+        }
         
     } catch (error) {
         console.error('Error loading thumbnails:', error);
@@ -540,5 +552,63 @@ updateSizeDisplay();
 updateSlideshowDisplay();
 loadThumbnails();
 
-// Auto-refresh every 30 seconds to pick up new images
-setInterval(loadThumbnails, 30000);
+// Function to check if folder contents have changed
+async function checkForChanges() {
+    try {
+        const url = currentFolder ? 
+            `/api/check-changes/${encodeURIComponent(currentFolder)}` : 
+            '/api/check-changes';
+        
+        const response = await fetch(url);
+        if (!response.ok) {
+            console.warn('Failed to check for changes:', response.status);
+            return false;
+        }
+        
+        const data = await response.json();
+        
+        // On first load, just store the values
+        if (lastModified === null || itemCount === null) {
+            lastModified = data.last_modified;
+            itemCount = data.item_count;
+            console.log('Change detection initialized:', {
+                folder: currentFolder || 'root',
+                lastModified: new Date(lastModified * 1000).toISOString(),
+                itemCount: itemCount
+            });
+            return false;
+        }
+        
+        // Check if anything has changed
+        const hasChanged = data.last_modified !== lastModified || data.item_count !== itemCount;
+        
+        if (hasChanged) {
+            console.log('Folder changes detected:', {
+                folder: currentFolder || 'root',
+                oldModified: new Date(lastModified * 1000).toISOString(),
+                newModified: new Date(data.last_modified * 1000).toISOString(),
+                oldCount: itemCount,
+                newCount: data.item_count
+            });
+            lastModified = data.last_modified;
+            itemCount = data.item_count;
+        }
+        
+        return hasChanged;
+        
+    } catch (error) {
+        console.warn('Error checking for changes:', error);
+        return false; // Don't refresh on error
+    }
+}
+
+// Smart auto-refresh: only refresh when files have actually changed
+async function smartRefresh() {
+    const hasChanges = await checkForChanges();
+    if (hasChanges) {
+        loadThumbnails();
+    }
+}
+
+// Check for changes every 30 seconds, but only refresh if needed
+setInterval(smartRefresh, 30000);

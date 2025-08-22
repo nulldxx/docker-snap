@@ -213,6 +213,42 @@ def health_check():
         'subfolders_count': len(subfolders)
     })
 
+@app.route('/api/check-changes')
+@app.route('/api/check-changes/<path:subfolder>')
+@login_required
+def check_changes(subfolder=''):
+    """API endpoint to check if folder contents have changed"""
+    current_path = get_safe_path(subfolder)
+    
+    if not os.path.exists(current_path):
+        return jsonify({'error': 'Folder not found'}), 404
+    
+    try:
+        # Get the last modification time of the directory itself
+        dir_mtime = os.path.getmtime(current_path)
+        
+        # Get modification times of all files and subdirectories
+        latest_mtime = dir_mtime
+        item_count = 0
+        
+        for item in os.listdir(current_path):
+            item_path = os.path.join(current_path, item)
+            try:
+                item_mtime = os.path.getmtime(item_path)
+                latest_mtime = max(latest_mtime, item_mtime)
+                item_count += 1
+            except (OSError, PermissionError):
+                continue
+        
+        return jsonify({
+            'last_modified': latest_mtime,
+            'item_count': item_count,
+            'folder': subfolder
+        })
+        
+    except (OSError, PermissionError) as e:
+        return jsonify({'error': 'Permission denied'}), 403
+
 if __name__ == '__main__':
     # Create images directory if it doesn't exist
     os.makedirs(IMAGES_FOLDER, exist_ok=True)

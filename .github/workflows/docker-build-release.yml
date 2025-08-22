@@ -54,5 +54,5 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
         repository: ${{ secrets.DOCKER_USERNAME }}/docker-snap
-        short-description: "TestPilot - JIRA Integration Flask App"
+        short-description: "Docker Snap - Image Gallery"
         readme-filepath: ./README.md
