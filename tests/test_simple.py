@@ -1,13 +1,27 @@
 import unittest
 import sys
 import os
+import tempfile
+import shutil
+from unittest.mock import patch
 
 # Add the app directory to Python path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app import allowed_file, allowed_video, is_media_file, get_breadcrumb_path, get_safe_path
+# Mock the IMAGES_FOLDER environment variable to use a temp directory
+temp_images_dir = tempfile.mkdtemp()
+with patch.dict(os.environ, {'IMAGES_FOLDER': temp_images_dir}):
+    from app import allowed_file, allowed_video, is_media_file, get_breadcrumb_path, get_safe_path, IMAGES_FOLDER
 
 class TestSimple(unittest.TestCase):
+    
+    @classmethod
+    def tearDownClass(cls):
+        """Clean up temp directory after all tests"""
+        try:
+            shutil.rmtree(temp_images_dir)
+        except:
+            pass  # Ignore cleanup errors
     
     def test_allowed_file(self):
         """Test image file extension validation"""
@@ -89,19 +103,18 @@ class TestSimple(unittest.TestCase):
         """Test path sanitization and security"""
         # Test empty path returns images folder
         result = get_safe_path('')
-        self.assertTrue(result.endswith('images') or result == '/images')
+        self.assertEqual(result, IMAGES_FOLDER)
         
         result = get_safe_path(None)
-        self.assertTrue(result.endswith('images') or result == '/images')
+        self.assertEqual(result, IMAGES_FOLDER)
         
         # Test that function returns safe paths
-        # Note: The exact behavior depends on the IMAGES_FOLDER configuration
-        # and OS path separators, but it should always be within the images folder
+        # The function should return paths within the IMAGES_FOLDER
         result = get_safe_path('vacation')
-        self.assertTrue('images' in result.lower())
+        self.assertTrue(result.startswith(IMAGES_FOLDER) or result == IMAGES_FOLDER)
         
         result = get_safe_path('family/photos')
-        self.assertTrue('images' in result.lower())
+        self.assertTrue(result.startswith(IMAGES_FOLDER) or result == IMAGES_FOLDER)
         
         # Test that the function handles potentially dangerous paths safely
         # These should all return the safe IMAGES_FOLDER path
@@ -109,7 +122,7 @@ class TestSimple(unittest.TestCase):
         for dangerous_path in dangerous_paths:
             result = get_safe_path(dangerous_path)
             # Should return the safe images folder, not the dangerous path
-            self.assertTrue('images' in result.lower())
+            self.assertEqual(result, IMAGES_FOLDER)
             self.assertNotIn('etc', result)
             self.assertNotIn('secrets', result)
 
