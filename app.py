@@ -9,7 +9,7 @@ from functools import wraps
 app = Flask(__name__)
 
 # Configuration
-IMAGES_FOLDER = '/images'
+IMAGES_FOLDER = os.environ.get('IMAGES_FOLDER', '/images')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'}
 
 # Get authentication credentials from environment variables
