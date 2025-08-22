@@ -33,20 +33,8 @@ FROM python:3.11-slim
 # Set working directory
 WORKDIR /app
 
-# Install only runtime dependencies (no build tools like gcc)
-RUN apt-get update && apt-get install -y \
-    libjpeg62-turbo \
-    zlib1g \
-    libfreetype6 \
-    liblcms2-2 \
-    libopenjp2-7 \
-    libtiff5 \
-    libharfbuzz0b \
-    libfribidi0 \
-    libxcb1 \
-    libglib2.0-0 \
-    && rm -rf /var/lib/apt/lists/* \
-    && apt-get clean
+# Runtime stage uses minimal packages - most dependencies handled by Python packages
+# If you get import errors, we can add specific packages back
 
 # Copy Python packages from builder stage
 COPY --from=builder /root/.local /root/.local
