@@ -1,10 +1,10 @@
-# Use Python 3.11 slim image as base
-FROM python:3.11-slim
+# Multi-stage build: Builder stage
+FROM python:3.11-slim AS builder
 
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies for Pillow and OpenCV
+# Install build dependencies for compiling Python packages
 RUN apt-get update && apt-get install -y \
     gcc \
     libjpeg-dev \
@@ -18,19 +18,37 @@ RUN apt-get update && apt-get install -y \
     libharfbuzz-dev \
     libfribidi-dev \
     libxcb1-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements and install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir --user -r requirements.txt
+
+# Multi-stage build: Runtime stage
+FROM python:3.11-slim
+
+# Set working directory
+WORKDIR /app
+
+# Install only runtime dependencies (no build tools)
+RUN apt-get update && apt-get install -y \
     libglib2.0-0 \
     libsm6 \
     libxext6 \
-    libxrender-dev \
+    libxrender1 \
     libgomp1 \
     libgthread-2.0-0 \
+    libjpeg62-turbo \
+    libfreetype6 \
+    liblcms2-2 \
+    libopenjp2-7 \
+    libtiff6 \
+    libharfbuzz0b \
+    libfribidi0 \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first for better Docker layer caching
-COPY requirements.txt .
-
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy Python packages from builder stage
+COPY --from=builder /root/.local /usr/local
 
 # Copy application code
 COPY app.py .
@@ -45,6 +63,8 @@ RUN mkdir -p /images
 # Create a non-root user for security
 RUN adduser --disabled-password --gecos '' appuser && \
     chown -R appuser:appuser /app /images
+
+# Switch to non-root user
 USER appuser
 
 # Expose port 5000
