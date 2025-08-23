@@ -1,6 +1,6 @@
 # docker-snap - Media Gallery Web App
 
-A lightweight, containerized media gallery built with Python Flask. Display your local images and videos as thumbnails with adjustable sizes, view images in fullscreen slideshow mode, or play videos with built-in controls.
+A lightweight, containerized media gallery built with Python Flask. Display your local images and videos as thumbnails with adjustable sizes, view images in fullscreen slideshow mode, or play videos with built-in controls. Works on and desktop and phones and supports easy navigation via either swiping or keyboard.
 
 ## ✨ Features
 

@@ -1,6 +1,6 @@
 # ![icon](https://github.com/user-attachments/assets/0f6efd89-75b1-4180-b326-cf057b78971d) docker-snap web app
 
-A media gallery web application built with Python Flask that runs in a lightweight Docker container. Display your local images and videos as thumbnails with adjustable sizes, click to view full-size images, or play videos with built-in controls.
+A media gallery web application built with Python Flask that runs in a lightweight Docker container. Display your local images and videos as thumbnails with adjustable sizes, click to view full-size images, or play videos with built-in controls. Works on and desktop and phones and supports easy navigation via either swiping or keyboard.
 
 **Available on Docker Hub**: `nerwander/docker-snap:latest` - Ready to deploy with just Docker Compose!
 
