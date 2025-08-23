@@ -10,6 +10,9 @@ docker-snap is a lightweight, containerized media gallery web application built 
 
 ### Building and Running
 ```bash
+# This container is developed on both windox and linux but docker is only present for testing on linux.  Check the operating
+# System before running these
+
 # Build and run locally (development)
 docker-compose up --build -d
 
