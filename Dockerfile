@@ -33,28 +33,34 @@ FROM python:3.11-slim
 # Set working directory
 WORKDIR /app
 
-# Runtime stage uses minimal packages - most dependencies handled by Python packages
-# If you get import errors, we can add specific packages back
+# Install only essential runtime dependencies
+RUN apt-get update && apt-get install -y \
+    libjpeg62-turbo \
+    zlib1g \
+    libfreetype6 \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
 
-# Copy Python packages from builder stage
-COPY --from=builder /root/.local /root/.local
+# Create a non-root user for security BEFORE copying packages
+RUN adduser --disabled-password --gecos '' appuser
 
-# Make sure scripts in .local are usable
-ENV PATH=/root/.local/bin:$PATH
+# Copy Python packages from builder stage and set ownership
+COPY --from=builder --chown=appuser:appuser /root/.local /home/appuser/.local
 
-# Copy application code
-COPY app.py .
-COPY gunicorn.conf.py .
-COPY templates/ templates/
-COPY static/ static/
-COPY icons/ icons/
+# Set PATH for the appuser
+ENV PATH=/home/appuser/.local/bin:$PATH
 
-# Create images directory
-RUN mkdir -p /images
+# Copy application code and set ownership
+COPY --chown=appuser:appuser app.py .
+COPY --chown=appuser:appuser gunicorn.conf.py .
+COPY --chown=appuser:appuser templates/ templates/
+COPY --chown=appuser:appuser static/ static/
+COPY --chown=appuser:appuser icons/ icons/
 
-# Create a non-root user for security
-RUN adduser --disabled-password --gecos '' appuser && \
-    chown -R appuser:appuser /app /images
+# Create images directory with proper ownership
+RUN mkdir -p /images && chown -R appuser:appuser /images
+
+# Switch to non-root user
 USER appuser
 
 # Expose port 5000
