@@ -1,13 +1,10 @@
-# Multi-stage build for smaller final image
-# This approach reduces image size by ~40-60% by excluding build tools from the final image
-
-# Stage 1: Builder stage with build dependencies
-FROM python:3.11-slim as builder
+# Use Python 3.11 slim image as base
+FROM python:3.11-slim
 
 # Set working directory
 WORKDIR /app
 
-# Install build dependencies for compiling Python packages
+# Install system dependencies for Pillow and OpenCV
 RUN apt-get update && apt-get install -y \
     gcc \
     libjpeg-dev \
@@ -21,46 +18,33 @@ RUN apt-get update && apt-get install -y \
     libharfbuzz-dev \
     libfribidi-dev \
     libxcb1-dev \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    libgomp1 \
+    libgthread-2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install Python dependencies to a local directory
+# Copy requirements first for better Docker layer caching
 COPY requirements.txt .
-RUN pip install --no-cache-dir --user -r requirements.txt
 
-# Stage 2: Runtime stage with minimal dependencies
-FROM python:3.11-slim
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Set working directory
-WORKDIR /app
+# Copy application code
+COPY app.py .
+COPY gunicorn.conf.py .
+COPY templates/ templates/
+COPY static/ static/
+COPY icons/ icons/
 
-# Install only essential runtime dependencies
-RUN apt-get update && apt-get install -y \
-    libjpeg62-turbo \
-    zlib1g \
-    libfreetype6 \
-    && rm -rf /var/lib/apt/lists/* \
-    && apt-get clean
+# Create images directory
+RUN mkdir -p /images
 
-# Create a non-root user for security BEFORE copying packages
-RUN adduser --disabled-password --gecos '' appuser
-
-# Copy Python packages from builder stage and set ownership
-COPY --from=builder --chown=appuser:appuser /root/.local /home/appuser/.local
-
-# Set PATH for the appuser
-ENV PATH=/home/appuser/.local/bin:$PATH
-
-# Copy application code and set ownership
-COPY --chown=appuser:appuser app.py .
-COPY --chown=appuser:appuser gunicorn.conf.py .
-COPY --chown=appuser:appuser templates/ templates/
-COPY --chown=appuser:appuser static/ static/
-COPY --chown=appuser:appuser icons/ icons/
-
-# Create images directory with proper ownership
-RUN mkdir -p /images && chown -R appuser:appuser /images
-
-# Switch to non-root user
+# Create a non-root user for security
+RUN adduser --disabled-password --gecos '' appuser && \
+    chown -R appuser:appuser /app /images
 USER appuser
 
 # Expose port 5000
