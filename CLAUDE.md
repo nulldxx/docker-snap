@@ -24,6 +24,8 @@ docker-compose logs -f docker-snap
 ```
 
 ### Testing
+
+#### Python Unit Tests
 ```bash
 # Run import tests (verify all dependencies work)
 python tests/test_imports.py
@@ -33,6 +35,21 @@ python -m pytest tests/test_simple.py -v
 
 # Run all tests
 python -m unittest discover tests/
+```
+
+#### Docker Container Testing
+```bash
+# Run comprehensive Docker container test suite
+./test-docker/test-container.sh
+
+# This test script validates:
+# - Docker build process
+# - Container startup and health
+# - Web interface accessibility
+# - API functionality
+# - JavaScript module loading
+# - Authentication system
+# - Performance benchmarks
 ```
 
 ### Release Management
