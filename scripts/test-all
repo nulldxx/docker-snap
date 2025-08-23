@@ -107,11 +107,22 @@ echo -e "${YELLOW}ℹ️  This may take several minutes for the first build...${
 echo ""
 
 # Run the Docker test script
-if ./test-docker/test-container.sh; then
-    handle_test_result "Docker container test suite" 0
-    ((DOCKER_TESTS_PASSED++))
-else
+# Ensure we have the correct path to the test script
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+DOCKER_TEST_SCRIPT="$PROJECT_ROOT/test-docker/test-container.sh"
+echo "Running $DOCKER_TEST_SCRIPT"
+
+if [ ! -f "$DOCKER_TEST_SCRIPT" ]; then
+    echo -e "${RED}❌ Docker test script not found at: $DOCKER_TEST_SCRIPT${NC}"
     handle_test_result "Docker container test suite" 1
+else
+    if "$DOCKER_TEST_SCRIPT"; then
+        handle_test_result "Docker container test suite" 0
+        ((DOCKER_TESTS_PASSED++))
+    else
+        handle_test_result "Docker container test suite" 1
+    fi
 fi
 echo ""
 
