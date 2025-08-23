@@ -8,6 +8,14 @@ class FullscreenManager {
         this.individualViewActive = false;
         this.currentIndividualImageIndex = 0;
 
+        // Touch/swipe handling
+        this.touchStartX = null;
+        this.touchStartY = null;
+        this.touchEndX = null;
+        this.touchEndY = null;
+        this.minSwipeDistance = 50; // Minimum pixels for a swipe
+        this.maxVerticalSwipe = 100; // Maximum vertical movement for horizontal swipe
+
         // DOM elements
         this.fullscreenOverlay = document.getElementById('fullscreenOverlay');
         this.fullscreenImage = document.getElementById('fullscreenImage');
@@ -227,6 +235,83 @@ class FullscreenManager {
         }
     }
 
+    // Touch/Swipe handling methods
+    handleTouchStart(e) {
+        // Only handle touch events in individual view mode
+        if (!this.individualViewActive) return;
+
+        // Get the first touch point
+        const touch = e.touches[0];
+        this.touchStartX = touch.clientX;
+        this.touchStartY = touch.clientY;
+        this.touchEndX = null;
+        this.touchEndY = null;
+
+        // Don't prevent default yet - let's see if this is a tap or swipe
+    }
+
+    handleTouchMove(e) {
+        // Only handle touch events in individual view mode
+        if (!this.individualViewActive) return;
+
+        // Update end positions continuously during move
+        const touch = e.touches[0];
+        this.touchEndX = touch.clientX;
+        this.touchEndY = touch.clientY;
+
+        // If we're moving significantly, prevent default to avoid scrolling
+        const deltaX = Math.abs(this.touchEndX - this.touchStartX);
+        const deltaY = Math.abs(this.touchEndY - this.touchStartY);
+        
+        if (deltaX > 10 || deltaY > 10) {
+            e.preventDefault();
+        }
+    }
+
+    handleTouchEnd(e) {
+        // Only handle touch events in individual view mode
+        if (!this.individualViewActive) return;
+
+        // Check if we have valid touch positions
+        if (this.touchStartX === null) return;
+
+        // If touchEndX is null, this was a tap without movement
+        if (this.touchEndX === null) {
+            this.touchEndX = this.touchStartX;
+            this.touchEndY = this.touchStartY;
+        }
+
+        const deltaX = this.touchEndX - this.touchStartX;
+        const deltaY = Math.abs(this.touchEndY - this.touchStartY);
+        const totalMovement = Math.abs(deltaX) + deltaY;
+
+        // Check if this is a tap (very little movement)
+        if (totalMovement < 20) {
+            // This is a tap - check if it's on the image/video or outside
+            const target = e.target || e.changedTouches[0].target;
+            
+            // If tap is not on the image/video itself, exit fullscreen
+            if (target !== this.fullscreenImage && target !== this.fullscreenVideo) {
+                this.hideFullscreen();
+            }
+        } else if (Math.abs(deltaX) >= this.minSwipeDistance && deltaY <= this.maxVerticalSwipe) {
+            // This is a swipe - handle navigation
+            if (deltaX > 0) {
+                // Swipe right - go to previous media
+                this.showPreviousMedia();
+            } else {
+                // Swipe left - go to next media  
+                this.showNextMedia();
+            }
+        }
+
+        // Reset touch positions
+        this.touchStartX = null;
+        this.touchStartY = null;
+        this.touchEndX = null;
+        this.touchEndY = null;
+    }
+
     hideFullscreen() {
         if (!window.slideshow || !window.slideshow.isActive()) {
             this.fullscreenOverlay.style.display = 'none';
@@ -283,6 +368,19 @@ class FullscreenManager {
                 }
             }
         });
+
+        // Touch/Swipe support for mobile navigation
+        this.fullscreenOverlay.addEventListener('touchstart', (e) => {
+            this.handleTouchStart(e);
+        }, { passive: false });
+
+        this.fullscreenOverlay.addEventListener('touchmove', (e) => {
+            this.handleTouchMove(e);
+        }, { passive: false });
+
+        this.fullscreenOverlay.addEventListener('touchend', (e) => {
+            this.handleTouchEnd(e);
+        }, { passive: false });
 
         // Expose functions globally for onclick handlers
         window.showFullscreen = (imageSrc) => this.showFullscreen(imageSrc);
