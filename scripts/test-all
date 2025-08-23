@@ -21,6 +21,7 @@ NC='\033[0m' # No Color
 # Test configuration
 START_TIME=$(date +%s)
 PYTHON_TESTS_PASSED=0
+JS_TESTS_PASSED=0
 DOCKER_TESTS_PASSED=0
 TOTAL_ERRORS=0
 
@@ -104,10 +105,54 @@ else
 fi
 echo ""
 
-print_section "PHASE 2: DOCKER CONTAINER TESTS"
+print_section "PHASE 2: JAVASCRIPT UNIT TESTS"
 
-# Test 3: Docker Container Test Suite
-echo -e "${BLUE}🐳 Test 2.1: Running comprehensive Docker container tests...${NC}"
+# Test 3: JavaScript Tests
+echo -e "${BLUE}🟨 Test 2.1: Running JavaScript unit tests...${NC}"
+
+# Check if Node.js is available
+if ! command -v node >/dev/null 2>&1; then
+    echo -e "${YELLOW}⚠️  Node.js not found, skipping JavaScript tests${NC}"
+    handle_test_result "JavaScript tests (skipped)" 0
+else
+    # Check if package.json exists
+    if [ ! -f "package.json" ]; then
+        echo -e "${YELLOW}⚠️  package.json not found, skipping JavaScript tests${NC}"
+        handle_test_result "JavaScript tests (skipped)" 0
+    else
+        # Install dependencies if node_modules doesn't exist
+        if [ ! -d "node_modules" ]; then
+            echo -e "${BLUE}📦 Installing JavaScript dependencies...${NC}"
+            npm install --silent
+            npm_exit_code=$?
+            if [ $npm_exit_code -ne 0 ]; then
+                handle_test_result "JavaScript dependency installation" $npm_exit_code
+                echo -e "${YELLOW}ℹ️  Skipping JavaScript tests due to dependency installation failure${NC}"
+            else
+                echo -e "${GREEN}✅ Dependencies installed successfully${NC}"
+            fi
+        fi
+        
+        # Run JavaScript tests if dependencies are available
+        if [ -d "node_modules" ]; then
+            npm test -- --passWithNoTests
+            js_exit_code=$?
+            if [ $js_exit_code -eq 0 ]; then
+                handle_test_result "JavaScript unit tests" 0
+                ((JS_TESTS_PASSED++))
+            else
+                handle_test_result "JavaScript unit tests" $js_exit_code
+                echo -e "${YELLOW}ℹ️  JavaScript test failures may indicate code issues or test environment problems${NC}"
+            fi
+        fi
+    fi
+fi
+echo ""
+
+print_section "PHASE 3: DOCKER CONTAINER TESTS"
+
+# Test 4: Docker Container Test Suite
+echo -e "${BLUE}🐳 Test 3.1: Running comprehensive Docker container tests...${NC}"
 echo -e "${YELLOW}ℹ️  This may take several minutes for the first build...${NC}"
 echo ""
 
@@ -138,11 +183,12 @@ print_section "TEST RESULTS SUMMARY"
 # Calculate test statistics
 END_TIME=$(date +%s)
 DURATION=$((END_TIME - START_TIME))
-TOTAL_TESTS=$((PYTHON_TESTS_PASSED + DOCKER_TESTS_PASSED))
+TOTAL_TESTS=$((PYTHON_TESTS_PASSED + JS_TESTS_PASSED + DOCKER_TESTS_PASSED))
 
 echo -e "${BLUE}📊 Test Statistics:${NC}"
 echo -e "   Duration: ${DURATION} seconds"
 echo -e "   Python Tests: ${PYTHON_TESTS_PASSED}/2 passed"
+echo -e "   JavaScript Tests: ${JS_TESTS_PASSED}/1 passed"
 echo -e "   Docker Tests: ${DOCKER_TESTS_PASSED}/1 passed"
 echo -e "   Total Errors: ${TOTAL_ERRORS}"
 echo ""
@@ -154,7 +200,9 @@ if [ $TOTAL_ERRORS -eq 0 ]; then
     echo ""
     echo -e "${BLUE}📋 What was tested:${NC}"
     echo -e "   • Python import functionality"
-    echo -e "   • Unit test coverage"
+    echo -e "   • Python unit test coverage"
+    echo -e "   • JavaScript module unit tests"
+    echo -e "   • JavaScript code functionality"
     echo -e "   • Docker build process"
     echo -e "   • Container health and startup"
     echo -e "   • Web interface functionality"
@@ -180,6 +228,13 @@ else
         echo -e "   • Some failures are expected outside Docker (e.g., OpenCV)"
     fi
     
+    if [ $JS_TESTS_PASSED -lt 1 ]; then
+        echo -e "   • JavaScript test failures may indicate code or environment issues"
+        echo -e "   • Install Node.js: https://nodejs.org/"
+        echo -e "   • Install dependencies: npm install"
+        echo -e "   • Run tests individually: npm test"
+    fi
+    
     if [ $DOCKER_TESTS_PASSED -lt 1 ]; then
         echo -e "   • Docker test failures may indicate container issues"
         echo -e "   • Check Docker is running: docker --version"
@@ -190,6 +245,7 @@ else
     echo ""
     echo -e "${BLUE}📋 For detailed logs, check:${NC}"
     echo -e "   • Python tests: Run individually in tests/ directory"
+    echo -e "   • JavaScript tests: npm test"
     echo -e "   • Docker tests: ./test-docker/test-container.sh"
     echo ""
     exit 1

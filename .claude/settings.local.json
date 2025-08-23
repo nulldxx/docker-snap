@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(python:*)",
-      "Bash(docker compose:*)"
+      "Bash(docker compose:*)",
+      "Bash(npm test:*)",
+      "Bash(bash scripts/test-all:*)",
+      "Bash(timeout 300 bash scripts/test-all)"
     ],
     "deny": [],
     "ask": []

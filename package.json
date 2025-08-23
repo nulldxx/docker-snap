@@ -1,0 +1,25 @@
+{
+  "name": "docker-snap",
+  "version": "1.0.0",
+  "description": "Containerized media gallery web application",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "testMatch": [
+      "**/tests/js/**/*.test.js"
+    ],
+    "collectCoverageFrom": [
+      "static/js/**/*.js",
+      "!static/js/gallery.js.backup"
+    ],
+    "setupFilesAfterEnv": ["<rootDir>/tests/js/setup.js"]
+  }
+}

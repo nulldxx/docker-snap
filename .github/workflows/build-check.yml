@@ -18,16 +18,33 @@ jobs:
       with:
         python-version: '3.11'
     
-    - name: Install dependencies
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip setuptools wheel
         pip install -r requirements.txt
+    
+    - name: Install JavaScript dependencies
+      run: |
+        npm ci
     
     - name: Check Python syntax
       run: |
         python -m py_compile app.py
 
-    - name: Test application
+    - name: Run Python tests
       run: |
-        echo "Running unit tests..."
+        echo "Running Python unit tests..."
         python -m unittest discover -s tests -v
+        echo "Running Python import tests..."
+        python tests/test_imports.py
+    
+    - name: Run JavaScript tests
+      run: |
+        echo "Running JavaScript unit tests..."
+        npm test

@@ -205,3 +205,51 @@ Thumbs.db
 
 # Setup script logs
 setup.log
+
+# Node dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+yarn.lock
+.pnpm-debug.log
+
+# Build output
+dist/
+build/
+out/
+tmp/
+temp/
+
+# Environment variables
+.env
+.env.*.local
+
+# Logs
+logs/
+*.log
+*.log.*
+*.out
+*.err
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE/editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Coverage / testing
+coverage/
+.nyc_output/
+
+# Misc
+*.tgz
+*.bak
+*.tmp
+
