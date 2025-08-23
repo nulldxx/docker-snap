@@ -26,9 +26,15 @@ TIMEOUT=30
 # Cleanup function
 cleanup() {
     echo -e "${YELLOW}🧹 Cleaning up test environment...${NC}"
-    docker compose -f ../docker-compose.yml down --remove-orphans 2>/dev/null || true
+    
+    # Ensure we're in the project root directory
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+    cd "$PROJECT_ROOT" 2>/dev/null || true
+    
+    docker compose down --remove-orphans 2>/dev/null || true
     docker rm -f $CONTAINER_NAME 2>/dev/null || true
-    rm -f cookies.txt test-response.html 2>/dev/null || true
+    rm -f cookies.txt test-response.html api-response.json gallery-response.html 2>/dev/null || true
     echo -e "${GREEN}✅ Cleanup completed${NC}"
 }
 
@@ -57,7 +63,19 @@ wait_for_healthy() {
 
 # Test 1: Build the container
 echo -e "${BLUE}📦 Test 1: Building Docker container...${NC}"
-cd ..
+
+# Ensure we're in the project root directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+cd "$PROJECT_ROOT"
+
+# Verify docker-compose.yml exists
+if [ ! -f "docker-compose.yml" ]; then
+    echo -e "${RED}❌ docker-compose.yml not found in $PWD${NC}"
+    echo "Expected to find it in: $PROJECT_ROOT"
+    exit 1
+fi
+
 docker compose build --no-cache
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}✅ Docker build successful${NC}"
