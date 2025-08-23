@@ -23,6 +23,18 @@ TEST_USERNAME="testuser"
 TEST_PASSWORD="testpass"
 TIMEOUT=30
 
+# Determine which compose file to use
+if [ -n "$COMPOSE_FILE" ]; then
+    COMPOSE_CMD="docker compose -f $COMPOSE_FILE"
+    echo -e "${BLUE}📋 Using compose file: $COMPOSE_FILE${NC}"
+elif [ -f "docker-compose.test.yml" ]; then
+    COMPOSE_CMD="docker compose -f docker-compose.test.yml"
+    echo -e "${BLUE}📋 Using test compose file: docker-compose.test.yml${NC}"
+else
+    COMPOSE_CMD="docker compose"
+    echo -e "${BLUE}📋 Using default compose file: docker-compose.yml${NC}"
+fi
+
 # Cleanup function
 cleanup() {
     echo -e "${YELLOW}🧹 Cleaning up test environment...${NC}"
@@ -33,6 +45,7 @@ cleanup() {
     cd "$PROJECT_ROOT" 2>/dev/null || true
     
     docker compose down --remove-orphans 2>/dev/null || true
+    $COMPOSE_CMD down --remove-orphans 2>/dev/null || true
     docker rm -f $CONTAINER_NAME 2>/dev/null || true
     rm -f cookies.txt test-response.html api-response.json gallery-response.html 2>/dev/null || true
     echo -e "${GREEN}✅ Cleanup completed${NC}"
@@ -69,14 +82,14 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 cd "$PROJECT_ROOT"
 
-# Verify docker-compose.yml exists
-if [ ! -f "docker-compose.yml" ]; then
+# Verify docker-compose.yml exists (skip check in CI with COMPOSE_FILE set)
+if [ -z "$COMPOSE_FILE" ] && [ ! -f "docker-compose.yml" ]; then
     echo -e "${RED}❌ docker-compose.yml not found in $PWD${NC}"
     echo "Expected to find it in: $PROJECT_ROOT"
     exit 1
 fi
 
-docker compose build --no-cache
+$COMPOSE_CMD build --no-cache
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}✅ Docker build successful${NC}"
 else
@@ -87,7 +100,7 @@ echo ""
 
 # Test 2: Start the container
 echo -e "${BLUE}🚀 Test 2: Starting container...${NC}"
-docker compose up -d
+$COMPOSE_CMD up -d
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}✅ Container started${NC}"
 else
@@ -213,13 +226,13 @@ echo ""
 
 # Test 9: Container logs check
 echo -e "${BLUE}📋 Test 9: Checking container logs for errors...${NC}"
-error_count=$(docker compose logs docker-snap 2>&1 | grep -i -c "error\|exception\|traceback" || true)
+error_count=$($COMPOSE_CMD logs docker-snap 2>&1 | grep -i -c "error\|exception\|traceback" || true)
 if [ "$error_count" -eq 0 ]; then
     echo -e "${GREEN}✅ No errors found in container logs${NC}"
 else
     echo -e "${YELLOW}⚠️  Found $error_count potential error(s) in logs${NC}"
     echo "Recent logs:"
-    docker compose logs --tail=10 docker-snap
+    $COMPOSE_CMD logs --tail=10 docker-snap
 fi
 echo ""
 
