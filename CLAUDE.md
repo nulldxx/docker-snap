@@ -25,7 +25,20 @@ docker-compose logs -f docker-snap
 
 ### Testing
 
-#### Python Unit Tests
+#### Comprehensive Test Suite (Recommended)
+```bash
+# Run all tests: Python unit tests + Docker container tests
+./scripts/test-all
+
+# This runs the complete test suite:
+# 1. Python import tests
+# 2. Python unit tests  
+# 3. Docker container tests (10 comprehensive checks)
+```
+
+#### Individual Test Components
+
+**Python Unit Tests**
 ```bash
 # Run import tests (verify all dependencies work)
 python tests/test_imports.py
@@ -37,7 +50,7 @@ python -m pytest tests/test_simple.py -v
 python -m unittest discover tests/
 ```
 
-#### Docker Container Testing
+**Docker Container Testing**
 ```bash
 # Run comprehensive Docker container test suite
 ./test-docker/test-container.sh
