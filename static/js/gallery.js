@@ -43,6 +43,8 @@ let slideshowImages = []; // Ordered/shuffled images for slideshow
 let isFullscreen = false; // Track fullscreen state
 let lastModified = null; // Track last modification time for change detection
 let itemCount = null; // Track item count for change detection
+let individualViewActive = false; // Track if we're viewing individual images (not slideshow)
+let currentIndividualImageIndex = 0; // Track current image index in individual view
 
 // Get current folder from URL
 function getCurrentFolder() {
@@ -448,6 +450,80 @@ function showFullscreen(imageSrc) {
     fullscreenImage.src = imageSrc;
     fullscreenOverlay.style.display = 'block';
     document.body.style.overflow = 'hidden';
+    
+    // Enable individual view navigation
+    individualViewActive = true;
+    
+    // Find the current image index in the allImages array
+    const imagePath = decodeURIComponent(imageSrc.replace('/images/', ''));
+    currentIndividualImageIndex = allImages.findIndex(item => 
+        item.type === 'image' && item.path === imagePath
+    );
+    if (currentIndividualImageIndex === -1) {
+        // Fallback: find first image in the array
+        currentIndividualImageIndex = allImages.findIndex(item => item.type === 'image');
+        if (currentIndividualImageIndex === -1) {
+            currentIndividualImageIndex = 0; // Last resort fallback
+        }
+    }
+}
+
+function showNextMedia() {
+    if (allImages.length === 0) return;
+    
+    // Find next media item (skip folders, include both images and videos)
+    let nextIndex = currentIndividualImageIndex;
+    let attempts = 0;
+    do {
+        nextIndex = (nextIndex + 1) % allImages.length;
+        attempts++;
+    } while ((allImages[nextIndex].type !== 'image' && allImages[nextIndex].type !== 'video') && attempts < allImages.length);
+    
+    const nextItem = allImages[nextIndex];
+    if (nextItem && nextItem.type === 'image') {
+        currentIndividualImageIndex = nextIndex;
+        fullscreenVideo.style.display = 'none';
+        fullscreenVideo.pause();
+        fullscreenImage.style.display = 'block';
+        fullscreenImage.src = `/images/${encodeURIComponent(nextItem.path)}`;
+        fullscreenImage.alt = nextItem.filename;
+    } else if (nextItem && nextItem.type === 'video') {
+        currentIndividualImageIndex = nextIndex;
+        fullscreenImage.style.display = 'none';
+        fullscreenVideo.style.display = 'block';
+        fullscreenVideo.src = `/videos/${encodeURIComponent(nextItem.path)}`;
+        fullscreenVideo.load();
+        fullscreenVideo.play();
+    }
+}
+
+function showPreviousMedia() {
+    if (allImages.length === 0) return;
+    
+    // Find previous media item (skip folders, include both images and videos)
+    let prevIndex = currentIndividualImageIndex;
+    let attempts = 0;
+    do {
+        prevIndex = prevIndex === 0 ? allImages.length - 1 : prevIndex - 1;
+        attempts++;
+    } while ((allImages[prevIndex].type !== 'image' && allImages[prevIndex].type !== 'video') && attempts < allImages.length);
+    
+    const prevItem = allImages[prevIndex];
+    if (prevItem && prevItem.type === 'image') {
+        currentIndividualImageIndex = prevIndex;
+        fullscreenVideo.style.display = 'none';
+        fullscreenVideo.pause();
+        fullscreenImage.style.display = 'block';
+        fullscreenImage.src = `/images/${encodeURIComponent(prevItem.path)}`;
+        fullscreenImage.alt = prevItem.filename;
+    } else if (prevItem && prevItem.type === 'video') {
+        currentIndividualImageIndex = prevIndex;
+        fullscreenImage.style.display = 'none';
+        fullscreenVideo.style.display = 'block';
+        fullscreenVideo.src = `/videos/${encodeURIComponent(prevItem.path)}`;
+        fullscreenVideo.load();
+        fullscreenVideo.play();
+    }
 }
 
 function showVideo(videoSrc, videoName) {
@@ -458,6 +534,22 @@ function showVideo(videoSrc, videoName) {
     fullscreenOverlay.style.display = 'block';
     document.body.style.overflow = 'hidden';
     
+    // Enable individual view navigation
+    individualViewActive = true;
+    
+    // Find the current video index in the allImages array
+    const videoPath = decodeURIComponent(videoSrc.replace('/videos/', ''));
+    currentIndividualImageIndex = allImages.findIndex(item => 
+        item.type === 'video' && item.path === videoPath
+    );
+    if (currentIndividualImageIndex === -1) {
+        // Fallback: find first video in the array
+        currentIndividualImageIndex = allImages.findIndex(item => item.type === 'video');
+        if (currentIndividualImageIndex === -1) {
+            currentIndividualImageIndex = 0; // Last resort fallback
+        }
+    }
+    
     // Optional: Auto-play video
     fullscreenVideo.load();
     fullscreenVideo.play();
@@ -467,6 +559,7 @@ function hideFullscreen() {
     if (!slideshowActive) {
         fullscreenOverlay.style.display = 'none';
         document.body.style.overflow = '';
+        individualViewActive = false; // Reset individual view state
         
         // Stop video playback when hiding
         if (fullscreenVideo.style.display !== 'none') {
@@ -568,11 +661,15 @@ document.addEventListener('keydown', function(e) {
             case 'ArrowLeft':
                 if (slideshowActive) {
                     prevSlideshowImage();
+                } else if (individualViewActive) {
+                    showPreviousMedia();
                 }
                 break;
             case 'ArrowRight':
                 if (slideshowActive) {
                     nextSlideshowImage();
+                } else if (individualViewActive) {
+                    showNextMedia();
                 }
                 break;
             case ' ':
