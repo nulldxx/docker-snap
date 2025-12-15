@@ -7,11 +7,15 @@ from urllib.parse import unquote, quote
 from functools import wraps
 import cv2
 import numpy as np
+import hashlib
+import shutil
 
 app = Flask(__name__)
 
 # Configuration
 IMAGES_FOLDER = os.environ.get('IMAGES_FOLDER', '/images')
+# Cache folder is placed inside images folder (hidden directory)
+CACHE_FOLDER = os.path.join(IMAGES_FOLDER, '.thumbscache')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'}
 VIDEO_EXTENSIONS = {'mp4', 'webm', 'ogg', 'avi', 'mov', 'mkv', 'm4v', 'mpg', 'mpeg'}
 
@@ -86,90 +90,173 @@ def get_breadcrumb_path(current_path):
     """Generate breadcrumb navigation"""
     if not current_path or current_path == '/':
         return []
-    
+
     parts = current_path.strip('/').split('/')
     breadcrumbs = []
     path = ''
-    
+
     for part in parts:
         path = f"{path}/{part}" if path else part
         breadcrumbs.append({
             'name': part,
             'path': path
         })
-    
+
     return breadcrumbs
 
-def create_thumbnail(image_path, size):
-    """Create thumbnail of specified size"""
+def get_cache_filename(filepath, filesize, thumb_size):
+    """Generate cache filename based on filepath, filesize, and thumbnail size"""
+    # Create hash of the relative filepath for a unique but consistent identifier
+    path_hash = hashlib.md5(filepath.encode('utf-8')).hexdigest()[:16]
+    # Include filesize and thumb_size in filename for validation
+    cache_name = f"{path_hash}_s{filesize}_t{thumb_size}.jpg"
+    return cache_name
+
+def get_cached_thumbnail(filepath, filesize, thumb_size):
+    """Retrieve cached thumbnail if it exists and is valid"""
     try:
+        cache_dir = os.path.join(CACHE_FOLDER, str(thumb_size))
+        cache_filename = get_cache_filename(filepath, filesize, thumb_size)
+        cache_path = os.path.join(cache_dir, cache_filename)
+
+        if os.path.exists(cache_path):
+            # Read cached thumbnail and convert to base64
+            with open(cache_path, 'rb') as f:
+                img_data = f.read()
+                img_base64 = base64.b64encode(img_data).decode('utf-8')
+                return f"data:image/jpeg;base64,{img_base64}"
+    except Exception as e:
+        print(f"Error reading cached thumbnail for {filepath}: {e}")
+
+    return None
+
+def save_thumbnail_to_cache(filepath, filesize, thumb_size, img_bytes):
+    """Save generated thumbnail to cache"""
+    try:
+        cache_dir = os.path.join(CACHE_FOLDER, str(thumb_size))
+        os.makedirs(cache_dir, exist_ok=True)
+
+        cache_filename = get_cache_filename(filepath, filesize, thumb_size)
+        cache_path = os.path.join(cache_dir, cache_filename)
+
+        with open(cache_path, 'wb') as f:
+            f.write(img_bytes)
+    except Exception as e:
+        print(f"Error saving thumbnail to cache for {filepath}: {e}")
+
+def cleanup_old_cache(current_size):
+    """Remove cached thumbnails for sizes other than current_size"""
+    try:
+        if not os.path.exists(CACHE_FOLDER):
+            return
+
+        for item in os.listdir(CACHE_FOLDER):
+            item_path = os.path.join(CACHE_FOLDER, item)
+            # Remove directories that are not the current size
+            if os.path.isdir(item_path) and item != str(current_size):
+                print(f"Cleaning up old cache directory: {item}")
+                shutil.rmtree(item_path)
+    except Exception as e:
+        print(f"Error cleaning up old cache: {e}")
+
+def create_thumbnail(image_path, size, relative_path=''):
+    """Create thumbnail of specified size with caching support"""
+    try:
+        # Get file size for cache validation
+        filesize = os.path.getsize(image_path)
+        cache_key = relative_path if relative_path else image_path
+
+        # Check cache first
+        cached = get_cached_thumbnail(cache_key, filesize, size)
+        if cached:
+            return cached
+
+        # Generate thumbnail if not cached
         with Image.open(image_path) as img:
             # Convert to RGB if necessary (for PNG with transparency)
             if img.mode in ('RGBA', 'LA', 'P'):
                 img = img.convert('RGB')
-            
+
             # Calculate thumbnail size maintaining aspect ratio
             img.thumbnail((size, size), Image.Resampling.LANCZOS)
-            
+
             # Save to bytes
             img_io = io.BytesIO()
             img.save(img_io, 'JPEG', quality=85)
             img_io.seek(0)
-            
+
+            # Save to cache
+            img_bytes = img_io.getvalue()
+            save_thumbnail_to_cache(cache_key, filesize, size, img_bytes)
+
             # Encode to base64
-            img_base64 = base64.b64encode(img_io.getvalue()).decode('utf-8')
+            img_base64 = base64.b64encode(img_bytes).decode('utf-8')
             return f"data:image/jpeg;base64,{img_base64}"
     except Exception as e:
         print(f"Error creating thumbnail for {image_path}: {e}")
         return None
 
-def create_video_thumbnail(video_path, size):
-    """Create thumbnail from video frame"""
+def create_video_thumbnail(video_path, size, relative_path=''):
+    """Create thumbnail from video frame with caching support"""
     try:
+        # Get file size for cache validation
+        filesize = os.path.getsize(video_path)
+        cache_key = relative_path if relative_path else video_path
+
+        # Check cache first
+        cached = get_cached_thumbnail(cache_key, filesize, size)
+        if cached:
+            return cached
+
+        # Generate video thumbnail if not cached
         # Open video file
         cap = cv2.VideoCapture(video_path)
-        
+
         if not cap.isOpened():
             print(f"Error: Could not open video {video_path}")
             return None
-        
+
         # Get video properties
         total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         fps = cap.get(cv2.CAP_PROP_FPS)
-        
+
         # Skip to a frame that's likely to have content (avoid black frames at start)
         # Try 10% into the video, or frame 30 if video is short
         target_frame = max(30, int(total_frames * 0.1))
-        
+
         # Set the frame position
         cap.set(cv2.CAP_PROP_POS_FRAMES, target_frame)
-        
+
         # Read the frame
         ret, frame = cap.read()
         cap.release()
-        
+
         if not ret or frame is None:
             print(f"Error: Could not read frame from {video_path}")
             return None
-        
+
         # Convert BGR to RGB (OpenCV uses BGR by default)
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        
+
         # Convert numpy array to PIL Image
         pil_image = Image.fromarray(frame_rgb)
-        
+
         # Create thumbnail maintaining aspect ratio
         pil_image.thumbnail((size, size), Image.Resampling.LANCZOS)
-        
+
         # Save to bytes
         img_io = io.BytesIO()
         pil_image.save(img_io, 'JPEG', quality=85)
         img_io.seek(0)
-        
+
+        # Save to cache
+        img_bytes = img_io.getvalue()
+        save_thumbnail_to_cache(cache_key, filesize, size, img_bytes)
+
         # Encode to base64
-        img_base64 = base64.b64encode(img_io.getvalue()).decode('utf-8')
+        img_base64 = base64.b64encode(img_bytes).decode('utf-8')
         return f"data:image/jpeg;base64,{img_base64}"
-        
+
     except Exception as e:
         print(f"Error creating video thumbnail for {video_path}: {e}")
         return None
@@ -227,11 +314,14 @@ def get_thumbnails(size, subfolder=''):
     """API endpoint to get thumbnails of specified size from specified folder"""
     # Validate size (between 50 and 400 pixels)
     size = max(50, min(400, size))
-    
+
+    # Clean up cache for other sizes (only keep current size)
+    cleanup_old_cache(size)
+
     current_path = get_safe_path(subfolder)
     subfolders, images, videos = get_folder_contents(current_path)
     thumbnails = []
-    
+
     # Add subfolders as special items
     for folder in subfolders:
         thumbnails.append({
@@ -240,46 +330,48 @@ def get_thumbnails(size, subfolder=''):
             'path': f"{subfolder}/{folder}" if subfolder else folder,
             'size': size  # Pass the size to frontend
         })
-    
+
     # Add image thumbnails
     for image in images:
         image_path = os.path.join(current_path, image)
-        thumbnail_data = create_thumbnail(image_path, size)
+        relative_path = f"{subfolder}/{image}" if subfolder else image
+        thumbnail_data = create_thumbnail(image_path, size, relative_path)
         if thumbnail_data:
             thumbnails.append({
                 'type': 'image',
                 'filename': image,
                 'thumbnail': thumbnail_data,
-                'path': f"{subfolder}/{image}" if subfolder else image
+                'path': relative_path
             })
-    
+
     # Add video thumbnails
     for video in videos:
         video_path = os.path.join(current_path, video)
-        thumbnail_data = create_video_thumbnail(video_path, size)
+        relative_path = f"{subfolder}/{video}" if subfolder else video
+        thumbnail_data = create_video_thumbnail(video_path, size, relative_path)
         if thumbnail_data:
             thumbnails.append({
                 'type': 'video',
                 'filename': video,
                 'thumbnail': thumbnail_data,
-                'path': f"{subfolder}/{video}" if subfolder else video
+                'path': relative_path
             })
         else:
             # Fallback to icon if thumbnail generation fails
             thumbnails.append({
                 'type': 'video',
                 'filename': video,
-                'path': f"{subfolder}/{video}" if subfolder else video,
+                'path': relative_path,
                 'size': size
             })
-    
+
     response = jsonify(thumbnails)
-    
+
     # Add no-cache headers to prevent browser caching of thumbnails
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     response.headers['Pragma'] = 'no-cache'
     response.headers['Expires'] = '0'
-    
+
     return response
 
 @app.route('/images/<path:filepath>')
@@ -391,8 +483,18 @@ def check_changes(subfolder=''):
 if __name__ == '__main__':
     # Create images directory if it doesn't exist
     os.makedirs(IMAGES_FOLDER, exist_ok=True)
+    # Try to create cache directory (may fail in read-only environments)
+    try:
+        os.makedirs(CACHE_FOLDER, exist_ok=True)
+    except (OSError, PermissionError):
+        print(f"Warning: Could not create cache folder {CACHE_FOLDER}. Caching will be disabled.")
     # For development only - use gunicorn in production
     app.run(host='0.0.0.0', port=5000, debug=False)
 
 # Ensure images directory exists when imported as WSGI app
 os.makedirs(IMAGES_FOLDER, exist_ok=True)
+# Try to create cache directory (may fail in read-only environments)
+try:
+    os.makedirs(CACHE_FOLDER, exist_ok=True)
+except (OSError, PermissionError):
+    print(f"Warning: Could not create cache folder {CACHE_FOLDER}. Caching will be disabled.")

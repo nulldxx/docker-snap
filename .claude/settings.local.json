@@ -11,7 +11,8 @@
       "Bash(docker run:*)",
       "Bash(curl:*)",
       "Bash(docker stop:*)",
-      "Bash(docker logs:*)"
+      "Bash(docker logs:*)",
+      "Bash(docker-compose logs:*)"
     ],
     "deny": [],
     "ask": []
