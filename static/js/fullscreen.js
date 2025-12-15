@@ -317,12 +317,98 @@ class FullscreenManager {
             this.fullscreenOverlay.style.display = 'none';
             document.body.style.overflow = '';
             this.individualViewActive = false; // Reset individual view state
-            
+
             // Stop video playback when hiding
             if (this.fullscreenVideo.style.display !== 'none') {
                 this.fullscreenVideo.pause();
                 this.fullscreenVideo.currentTime = 0;
             }
+        }
+    }
+
+    isMobileDevice() {
+        // Check if device is mobile/tablet
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+
+    async deleteCurrentMedia() {
+        // Get the current media item
+        const currentItem = this.config.allImages[this.currentIndividualImageIndex];
+        if (!currentItem || (currentItem.type !== 'image' && currentItem.type !== 'video')) {
+            return;
+        }
+
+        const filename = currentItem.filename;
+        const filepath = currentItem.path;
+
+        // Show confirmation dialog
+        const confirmed = confirm(`Are you sure you want to delete "${filename}"?\n\nThis action cannot be undone.`);
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+            // Call the delete API
+            const response = await fetch(`/api/delete/${encodeURIComponent(filepath)}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                // Remove from the allImages array
+                this.config.allImages.splice(this.currentIndividualImageIndex, 1);
+
+                // Show success message briefly
+                alert(`"${filename}" has been deleted.`);
+
+                // If there are more media items, show the next one
+                if (this.config.allImages.length > 0) {
+                    // Adjust index if we're at the end
+                    if (this.currentIndividualImageIndex >= this.config.allImages.length) {
+                        this.currentIndividualImageIndex = this.config.allImages.length - 1;
+                    }
+
+                    // Show next media (or previous if we were at the end)
+                    const nextItem = this.config.allImages[this.currentIndividualImageIndex];
+                    if (nextItem && nextItem.type === 'image') {
+                        this.fullscreenVideo.style.display = 'none';
+                        this.fullscreenVideo.pause();
+                        this.fullscreenImage.style.display = 'block';
+                        this.fullscreenImage.src = `/images/${encodeURIComponent(nextItem.path)}`;
+                        this.fullscreenImage.alt = nextItem.filename;
+                    } else if (nextItem && nextItem.type === 'video') {
+                        this.fullscreenImage.style.display = 'none';
+                        this.fullscreenVideo.style.display = 'block';
+                        this.fullscreenVideo.src = `/videos/${encodeURIComponent(nextItem.path)}`;
+                        this.fullscreenVideo.load();
+                        this.fullscreenVideo.play();
+                    } else {
+                        // No more media items, close fullscreen
+                        this.hideFullscreen();
+                    }
+
+                    // Reload the gallery to update thumbnails
+                    if (window.galleryLoader) {
+                        window.galleryLoader.loadGallery();
+                    }
+                } else {
+                    // No more media items, close fullscreen and reload gallery
+                    this.hideFullscreen();
+                    if (window.galleryLoader) {
+                        window.galleryLoader.loadGallery();
+                    }
+                }
+            } else {
+                // Show error message
+                alert(`Failed to delete "${filename}": ${result.error || 'Unknown error'}`);
+            }
+        } catch (error) {
+            console.error('Error deleting file:', error);
+            alert(`Failed to delete "${filename}": ${error.message}`);
         }
     }
 
@@ -364,6 +450,14 @@ class FullscreenManager {
                         break;
                     case 'ArrowRight':
                         this.showNextMedia();
+                        break;
+                    case 'Delete':
+                    case 'Backspace':
+                        // Only allow delete on desktop (non-mobile devices)
+                        if (!this.isMobileDevice()) {
+                            e.preventDefault(); // Prevent browser back navigation on backspace
+                            this.deleteCurrentMedia();
+                        }
                         break;
                 }
             }

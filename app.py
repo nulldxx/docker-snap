@@ -480,6 +480,66 @@ def check_changes(subfolder=''):
         error_response.headers['Expires'] = '0'
         return error_response, 403
 
+@app.route('/api/delete/<path:filepath>', methods=['DELETE'])
+@login_required
+def delete_file(filepath):
+    """API endpoint to delete a file (images or videos only)"""
+    try:
+        # Get the safe path
+        safe_path = get_safe_path('')
+        full_path = os.path.join(safe_path, filepath)
+
+        # Security check - ensure path is within images folder
+        if not full_path.startswith(IMAGES_FOLDER):
+            return jsonify({'error': 'Access denied'}), 403
+
+        # Check if file exists
+        if not os.path.exists(full_path):
+            return jsonify({'error': 'File not found'}), 404
+
+        # Check if it's a file (not a directory)
+        if not os.path.isfile(full_path):
+            return jsonify({'error': 'Cannot delete directories'}), 400
+
+        # Check if it's a media file
+        filename = os.path.basename(full_path)
+        if not is_media_file(filename):
+            return jsonify({'error': 'Can only delete media files'}), 400
+
+        # Delete cached thumbnails for this file
+        try:
+            filesize = os.path.getsize(full_path)
+            # Check all cache size directories
+            if os.path.exists(CACHE_FOLDER):
+                for cache_size_dir in os.listdir(CACHE_FOLDER):
+                    cache_dir_path = os.path.join(CACHE_FOLDER, cache_size_dir)
+                    if os.path.isdir(cache_dir_path):
+                        try:
+                            size = int(cache_size_dir)
+                            cache_filename = get_cache_filename(filepath, filesize, size)
+                            cache_file_path = os.path.join(cache_dir_path, cache_filename)
+                            if os.path.exists(cache_file_path):
+                                os.remove(cache_file_path)
+                        except (ValueError, OSError):
+                            continue
+        except Exception as e:
+            print(f"Warning: Could not clean up cache for {filepath}: {e}")
+
+        # Delete the actual file
+        os.remove(full_path)
+
+        return jsonify({
+            'success': True,
+            'message': f'File {filename} deleted successfully',
+            'filepath': filepath
+        })
+
+    except PermissionError:
+        return jsonify({'error': 'Permission denied'}), 403
+    except Exception as e:
+        print(f"Error deleting file {filepath}: {e}")
+        return jsonify({'error': 'Failed to delete file'}), 500
+
 if __name__ == '__main__':
     # Create images directory if it doesn't exist
     os.makedirs(IMAGES_FOLDER, exist_ok=True)
