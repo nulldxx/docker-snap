@@ -393,13 +393,13 @@ class FullscreenManager {
 
                     // Reload the gallery to update thumbnails
                     if (window.galleryLoader) {
-                        window.galleryLoader.loadGallery();
+                        window.galleryLoader.loadThumbnails();
                     }
                 } else {
                     // No more media items, close fullscreen and reload gallery
                     this.hideFullscreen();
                     if (window.galleryLoader) {
-                        window.galleryLoader.loadGallery();
+                        window.galleryLoader.loadThumbnails();
                     }
                 }
             } else {
