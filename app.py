@@ -86,6 +86,46 @@ def get_folder_contents(folder_path):
     
     return sorted(subfolders), sorted(images), sorted(videos)
 
+def get_first_media_file(folder_path, max_depth=2, current_depth=0):
+    """
+    Get the first media file in a folder (images preferred, then videos)
+
+    Args:
+        folder_path: Path to search
+        max_depth: How many levels deep to search (default 2)
+        current_depth: Current recursion depth
+
+    Returns:
+        tuple: (media_type, full_path) or (None, None)
+        where media_type is 'image' or 'video'
+    """
+    if current_depth > max_depth or not os.path.exists(folder_path):
+        return None, None
+
+    try:
+        subfolders, images, videos = get_folder_contents(folder_path)
+
+        # Prioritize images over videos
+        if images:
+            first_image = images[0]
+            return 'image', os.path.join(folder_path, first_image)
+
+        if videos:
+            first_video = videos[0]
+            return 'video', os.path.join(folder_path, first_video)
+
+        # If no media in current folder, recursively check subfolders
+        if current_depth < max_depth:
+            for subfolder in subfolders:
+                subfolder_path = os.path.join(folder_path, subfolder)
+                media_type, media_path = get_first_media_file(subfolder_path, max_depth, current_depth + 1)
+                if media_type:
+                    return media_type, media_path
+
+        return None, None
+    except (PermissionError, OSError):
+        return None, None
+
 def get_breadcrumb_path(current_path):
     """Generate breadcrumb navigation"""
     if not current_path or current_path == '/':
@@ -261,6 +301,43 @@ def create_video_thumbnail(video_path, size, relative_path=''):
         print(f"Error creating video thumbnail for {video_path}: {e}")
         return None
 
+def create_folder_preview_thumbnail(folder_path, size, relative_folder_path=''):
+    """
+    Create a preview thumbnail for a folder from its first media file
+
+    Args:
+        folder_path: Absolute path to the folder
+        size: Thumbnail size in pixels
+        relative_folder_path: Relative path for cache key
+
+    Returns:
+        dict with 'thumbnail' (base64 data) and 'media_type' ('image'/'video') or None
+    """
+    try:
+        # Find the first media file in the folder
+        media_type, media_path = get_first_media_file(folder_path)
+
+        if not media_type or not media_path:
+            return None
+
+        # Generate thumbnail using existing functions
+        thumbnail_data = None
+        if media_type == 'image':
+            thumbnail_data = create_thumbnail(media_path, size, relative_folder_path)
+        elif media_type == 'video':
+            thumbnail_data = create_video_thumbnail(media_path, size, relative_folder_path)
+
+        if not thumbnail_data:
+            return None
+
+        return {
+            'thumbnail': thumbnail_data,
+            'media_type': media_type
+        }
+    except Exception as e:
+        print(f"Error creating folder preview thumbnail for {folder_path}: {e}")
+        return None
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     """Login page"""
@@ -322,14 +399,29 @@ def get_thumbnails(size, subfolder=''):
     subfolders, images, videos = get_folder_contents(current_path)
     thumbnails = []
 
-    # Add subfolders as special items
+    # Add subfolders with preview thumbnails
     for folder in subfolders:
-        thumbnails.append({
+        folder_path = os.path.join(current_path, folder)
+        relative_folder_path = f"{subfolder}/{folder}" if subfolder else folder
+
+        folder_obj = {
             'type': 'folder',
             'name': folder,
-            'path': f"{subfolder}/{folder}" if subfolder else folder,
-            'size': size  # Pass the size to frontend
-        })
+            'path': relative_folder_path,
+            'size': size
+        }
+
+        # Try to generate folder preview thumbnail
+        try:
+            preview_data = create_folder_preview_thumbnail(folder_path, size, relative_folder_path)
+            if preview_data:
+                folder_obj['preview'] = preview_data['thumbnail']
+                folder_obj['preview_type'] = preview_data['media_type']
+        except Exception as e:
+            print(f"Error creating folder preview for {folder}: {e}")
+            # Will fall back to folder icon in frontend
+
+        thumbnails.append(folder_obj)
 
     # Add image thumbnails
     for image in images:

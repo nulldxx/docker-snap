@@ -12,7 +12,9 @@
       "Bash(curl:*)",
       "Bash(docker stop:*)",
       "Bash(docker logs:*)",
-      "Bash(docker-compose logs:*)"
+      "Bash(docker-compose logs:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(python3:*)"
     ],
     "deny": [],
     "ask": []

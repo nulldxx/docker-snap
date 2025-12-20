@@ -54,16 +54,35 @@ class GalleryLoader {
             // Add folders first
             folders.forEach(folder => {
                 const folderSize = this.config.sizeMap[this.config.currentSize].pixels;
-                galleryHTML += `
-                    <div class="folder-item" style="width: ${folderSize}px;" onclick="navigateToFolder('${folder.path}')">
-                        <div class="folder-icon">
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M10 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2h-8l-2-2z"/>
-                            </svg>
+
+                if (folder.preview) {
+                    // Folder with preview thumbnail - use image with overlay
+                    galleryHTML += `
+                        <div class="folder-item folder-with-preview" style="width: ${folderSize}px;" onclick="navigateToFolder('${folder.path}')">
+                            <div class="folder-preview-container">
+                                <img src="${folder.preview}" alt="${folder.name}" loading="lazy" class="folder-preview-image">
+                                <div class="folder-frame-overlay">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor" class="folder-overlay-icon">
+                                        <path d="M10 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2h-8l-2-2z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="folder-name">${folder.name}</div>
                         </div>
-                        <div class="folder-name">${folder.name}</div>
-                    </div>
-                `;
+                    `;
+                } else {
+                    // Folder without preview - use classic icon
+                    galleryHTML += `
+                        <div class="folder-item" style="width: ${folderSize}px;" onclick="navigateToFolder('${folder.path}')">
+                            <div class="folder-icon">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M10 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2h-8l-2-2z"/>
+                                </svg>
+                            </div>
+                            <div class="folder-name">${folder.name}</div>
+                        </div>
+                    `;
+                }
             });
             
             // Add images
