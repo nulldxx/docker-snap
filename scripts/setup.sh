@@ -46,7 +46,7 @@ mkdir -p sample-images
 
 # Download docker-compose.yml
 echo "⬇️  Downloading docker-compose.yml..."
-curl -s -o docker-compose.yml https://raw.githubusercontent.com/nerwander/docker-snap/main/docker-compose.yml
+curl -s -o docker-compose.yml https://raw.githubusercontent.com/nulldxx/docker-snap/main/docker-compose.yml
 
 if [ $? -ne 0 ]; then
     echo "❌ Failed to download docker-compose.yml"

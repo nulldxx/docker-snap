@@ -48,7 +48,7 @@ New-Item -ItemType Directory -Force -Path "sample-images" | Out-Null
 # Download docker-compose.yml
 Write-Host "⬇️  Downloading docker-compose.yml..." -ForegroundColor Green
 try {
-    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/nerwander/docker-snap/main/docker-compose.yml" -OutFile "docker-compose.yml"
+    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/nulldxx/docker-snap/main/docker-compose.yml" -OutFile "docker-compose.yml"
     Write-Host "✅ docker-compose.yml downloaded successfully" -ForegroundColor Green
 } catch {
     Write-Host "❌ Failed to download docker-compose.yml" -ForegroundColor Red

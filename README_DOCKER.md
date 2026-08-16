@@ -152,4 +152,4 @@ MIT License - See repository for full details.
 
 ---
 
-**Need more advanced configuration?** Check the full documentation in the [GitHub repository](https://github.com/nerwander/docker-snap).
+**Need more advanced configuration?** Check the full documentation in the [GitHub repository](https://github.com/nulldxx/docker-snap).

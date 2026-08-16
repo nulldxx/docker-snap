@@ -31,19 +31,19 @@ A media gallery web application built with Python Flask that runs in a lightweig
 
 ### One-Line Setup (Linux/macOS)
 ```bash
-curl -s https://raw.githubusercontent.com/nerwander/docker-snap/main/setup.sh | bash
+curl -s https://raw.githubusercontent.com/nulldxx/docker-snap/main/setup.sh | bash
 ```
 
 ### One-Line Setup (Windows PowerShell)
 ```powershell
-iwr https://raw.githubusercontent.com/nerwander/docker-snap/main/setup.ps1 | iex
+iwr https://raw.githubusercontent.com/nulldxx/docker-snap/main/setup.ps1 | iex
 ```
 
 ### Manual Setup
 ```bash
 # Create a folder and download the compose file
 mkdir my-gallery && cd my-gallery
-curl -O https://raw.githubusercontent.com/nerwander/docker-snap/main/docker-compose.yml
+curl -O https://raw.githubusercontent.com/nulldxx/docker-snap/main/docker-compose.yml
 
 # Create sample images folder and start the gallery
 mkdir sample-images
@@ -74,7 +74,7 @@ Add your images to the `sample-images` folder and refresh the page!
 
 1. **Download the compose file**:
    ```bash
-   curl -O https://raw.githubusercontent.com/nerwander/docker-snap/main/docker-compose.yml
+   curl -O https://raw.githubusercontent.com/nulldxx/docker-snap/main/docker-compose.yml
    ```
    
    Or create a `docker-compose.yml` file with the following content:
@@ -175,7 +175,7 @@ If you want to modify the application:
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/nerwander/docker-snap.git
+   git clone https://github.com/nulldxx/docker-snap.git
    cd docker-snap
    ```
 
