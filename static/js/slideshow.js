@@ -227,7 +227,7 @@ class Slideshow {
         this.stopVideoPlayback();
         this.fullscreenVideo.style.display = 'none';
         this.fullscreenVideo.controls = true; // Restore native controls for individual viewing
-        this.fullscreenVideo.muted = false; // Individual video viewing plays with sound
+        this.fullscreenVideo.muted = true; // Individual video viewing also starts muted
         
         // Hide fullscreen overlay and controls
         this.fullscreenOverlay.style.display = 'none';

@@ -172,7 +172,8 @@ class FullscreenManager {
             }
         }
         
-        // Optional: Auto-play video
+        // Optional: Auto-play video (muted so autoplay is always permitted)
+        this.fullscreenVideo.muted = true;
         this.fullscreenVideo.load();
         this.fullscreenVideo.play();
     }
@@ -201,6 +202,7 @@ class FullscreenManager {
             this.fullscreenImage.style.display = 'none';
             this.fullscreenVideo.style.display = 'block';
             this.fullscreenVideo.src = `/videos/${encodeURIComponent(nextItem.path)}`;
+            this.fullscreenVideo.muted = true;
             this.fullscreenVideo.load();
             this.fullscreenVideo.play();
         }
@@ -230,6 +232,7 @@ class FullscreenManager {
             this.fullscreenImage.style.display = 'none';
             this.fullscreenVideo.style.display = 'block';
             this.fullscreenVideo.src = `/videos/${encodeURIComponent(prevItem.path)}`;
+            this.fullscreenVideo.muted = true;
             this.fullscreenVideo.load();
             this.fullscreenVideo.play();
         }
@@ -384,6 +387,7 @@ class FullscreenManager {
                         this.fullscreenImage.style.display = 'none';
                         this.fullscreenVideo.style.display = 'block';
                         this.fullscreenVideo.src = `/videos/${encodeURIComponent(nextItem.path)}`;
+                        this.fullscreenVideo.muted = true;
                         this.fullscreenVideo.load();
                         this.fullscreenVideo.play();
                     } else {
