@@ -39,9 +39,10 @@ class GalleryLoader {
             const images = data.filter(item => item.type === 'image');
             const videos = data.filter(item => item.type === 'video');
             
-            this.config.allImages = images;
+            // Slideshow and fullscreen navigation walk every playable item, in API order
+            this.config.allImages = data.filter(item => item.type === 'image' || item.type === 'video');
             
-            if (this.config.allImages.length === 0 && folders.length === 0 && videos.length === 0) {
+            if (this.config.allImages.length === 0 && folders.length === 0) {
                 if (window.uiControls) {
                     window.uiControls.showNoImages();
                 }
@@ -86,7 +87,7 @@ class GalleryLoader {
             });
             
             // Add images
-            this.config.allImages.forEach((image, index) => {
+            images.forEach((image, index) => {
                 galleryHTML += `
                     <div class="image-item" onclick="showFullscreen('/images/${encodeURIComponent(image.path)}')">
                         <img src="${image.thumbnail}" alt="${image.filename}" loading="lazy">

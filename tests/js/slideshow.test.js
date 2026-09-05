@@ -54,8 +54,17 @@ describe('Slideshow', () => {
     slideshow.imageName = { textContent: '' };
     slideshow.fullscreenOverlay = mockElement;
     slideshow.fullscreenImage = mockElement;
-    slideshow.fullscreenVideo = { ...mockElement, pause: jest.fn() };
+    slideshow.fullscreenVideo = {
+      ...mockElement,
+      style: { display: '' },
+      muted: false,
+      pause: jest.fn(),
+      load: jest.fn(),
+      play: jest.fn(() => Promise.resolve()),
+      removeAttribute: jest.fn()
+    };
     slideshow.playPauseBtn = { textContent: '' };
+    slideshow.muteBtn = { textContent: '🔇', addEventListener: jest.fn(), click: jest.fn() };
     
     // Mock global functions
     window.fullscreenManager = {
@@ -280,6 +289,81 @@ describe('Slideshow', () => {
       
       expect(slideshow.slideshowBtn.disabled).toBe(false);
       expect(slideshow.slideshowBtn.textContent).toBe('▷ Start Slideshow');
+    });
+  });
+
+  describe('Video playback', () => {
+    beforeEach(() => {
+      slideshow.slideshowImages = [
+        { filename: 'img1.jpg', path: 'img1.jpg', type: 'image' },
+        { filename: 'clip.mp4', path: 'clip.mp4', type: 'video' }
+      ];
+      slideshow.slideshowActive = true;
+    });
+
+    test('showSlideshowImage should play a video muted', () => {
+      slideshow.showSlideshowImage(1);
+
+      expect(slideshow.fullscreenVideo.src).toBe('/videos/clip.mp4');
+      expect(slideshow.fullscreenVideo.muted).toBe(true);
+      expect(slideshow.fullscreenVideo.style.display).toBe('block');
+      expect(slideshow.fullscreenVideo.load).toHaveBeenCalled();
+      expect(slideshow.fullscreenVideo.play).toHaveBeenCalled();
+    });
+
+    test('showSlideshowImage should stop video playback when showing a photo', () => {
+      slideshow.showSlideshowImage(0);
+
+      expect(slideshow.fullscreenVideo.pause).toHaveBeenCalled();
+      expect(slideshow.fullscreenVideo.removeAttribute).toHaveBeenCalledWith('src');
+      expect(slideshow.fullscreenImage.src).toBe('/images/img1.jpg');
+    });
+
+    test('startSlideshowTimer should not set an interval for a video', () => {
+      slideshow.currentImageIndex = 1;
+
+      slideshow.startSlideshowTimer();
+
+      expect(slideshow.slideshowTimer).toBeNull();
+    });
+
+    test('startSlideshowTimer should set an interval for a photo', () => {
+      slideshow.currentImageIndex = 0;
+
+      slideshow.startSlideshowTimer();
+
+      expect(slideshow.slideshowTimer).not.toBeNull();
+    });
+
+    test('pause and resume should control a playing video', () => {
+      slideshow.currentImageIndex = 1;
+
+      slideshow.pauseSlideshow();
+      expect(slideshow.slideshowPaused).toBe(true);
+      expect(slideshow.fullscreenVideo.pause).toHaveBeenCalled();
+
+      slideshow.resumeSlideshow();
+      expect(slideshow.slideshowPaused).toBe(false);
+      expect(slideshow.fullscreenVideo.play).toHaveBeenCalled();
+      expect(slideshow.slideshowTimer).toBeNull();
+    });
+  });
+
+  describe('toggleMute', () => {
+    test('should unmute and re-mute the video', () => {
+      expect(slideshow.slideshowMuted).toBe(true);
+
+      slideshow.toggleMute();
+
+      expect(slideshow.slideshowMuted).toBe(false);
+      expect(slideshow.fullscreenVideo.muted).toBe(false);
+      expect(slideshow.muteBtn.textContent).toBe('\u{1F50A}');
+
+      slideshow.toggleMute();
+
+      expect(slideshow.slideshowMuted).toBe(true);
+      expect(slideshow.fullscreenVideo.muted).toBe(true);
+      expect(slideshow.muteBtn.textContent).toBe('\u{1F507}');
     });
   });
 

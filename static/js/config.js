@@ -13,7 +13,7 @@ class GalleryConfig {
         // Current state
         this.currentSize = 3;
         this.currentFolder = '';
-        this.allImages = []; // Store all image data for slideshow
+        this.allImages = []; // Store all playable media (images and videos) for slideshow
         this.lastModified = null; // Track last modification time for change detection
         this.itemCount = null; // Track item count for change detection
 

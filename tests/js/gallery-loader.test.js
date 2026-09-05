@@ -119,7 +119,7 @@ describe('GalleryLoader', () => {
       
       await galleryLoader.loadThumbnails();
       
-      expect(config.allImages).toEqual([mockData[1]]); // Only images
+      expect(config.allImages).toEqual([mockData[1], mockData[2]]); // Images and videos
       expect(galleryLoader.gallery.innerHTML).toContain('folder-item');
       expect(galleryLoader.gallery.innerHTML).toContain('image-item');
       expect(galleryLoader.gallery.innerHTML).toContain('video-item');
